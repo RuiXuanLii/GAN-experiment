@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.env
+data/
+runs/
+*.pt
+*.pth
+freeze.json
+results/round1/bilinear_adaptive/trajectory.csv
+results/round1/synthetic_figures/training_diagnostics.png
+results/round1/synthetic_runs/**/metrics.jsonl
+results/round1/synthetic_runs/**/samples.npy

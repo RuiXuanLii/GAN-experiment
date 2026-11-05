@@ -1,0 +1,28 @@
+{
+  "eta": 0.3,
+  "steps": 200,
+  "eg_identity_absolute_error": 0.0,
+  "scope": "fixed-step nonadaptive bilinear models",
+  "spectral_radii": [
+    {
+      "method": "GDA",
+      "spectral_radius": 1.0440306508910548
+    },
+    {
+      "method": "EG",
+      "spectral_radius": 0.9581753492967766
+    },
+    {
+      "method": "LA-GDA k=2 alpha=.5",
+      "spectral_radius": 1.0010119879402044
+    },
+    {
+      "method": "LA-GDA k=5 alpha=.5",
+      "spectral_radius": 0.8395867964213112
+    },
+    {
+      "method": "OGDA",
+      "spectral_radius": 0.9486832980505138
+    }
+  ]
+}

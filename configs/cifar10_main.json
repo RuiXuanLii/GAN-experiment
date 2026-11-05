@@ -1,0 +1,32 @@
+{
+  "protocol": "v1.0",
+  "stage": "main",
+  "dataset": "cifar10",
+  "algorithm": "adam",
+  "seed": 11,
+  "split_seed": 2026,
+  "batch_size": 64,
+  "z_dim": 64,
+  "hidden": 32,
+  "base_channels": 32,
+  "lr": 0.0001,
+  "betas": [
+    0.5,
+    0.9
+  ],
+  "eps": 1e-08,
+  "gp_lambda": 10.0,
+  "oracle_budget": 20000,
+  "log_every": 2000,
+  "checkpoint_every": 2000,
+  "extra_batch": "independent",
+  "lookahead_k": 5,
+  "lookahead_alpha": 0.5,
+  "device": "cuda",
+  "threads": 1,
+  "data_root": "data",
+  "download": false,
+  "eval_samples": 64,
+  "keep_checkpoints": true,
+  "freeze_file": "freeze.json"
+}

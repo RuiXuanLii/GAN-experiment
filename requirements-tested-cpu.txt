@@ -1,0 +1,8 @@
+# Actual environment, torch CPU wheel index required
+torch==2.5.1+cpu
+torchvision==0.20.1+cpu
+numpy==2.3.5
+matplotlib==3.10.8
+Pillow==12.3.0
+pytest==9.2.0
+psutil==7.2.2
