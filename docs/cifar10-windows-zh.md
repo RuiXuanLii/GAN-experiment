@@ -8,10 +8,10 @@
 py -3 scripts/prepare_cifar10.py
 ```
 
-默认下载目录就是 `D:\ESTR3108\project\CIFAR-10\dataset`。也可以明确指定同一路径：
+默认下载目录就是 `D:\ESTR3114\project\CIFAR-10\dataset`。也可以明确指定同一路径：
 
 ```powershell
-py -3 scripts/prepare_cifar10.py --root "D:\ESTR3108\project\CIFAR-10\dataset"
+py -3 scripts/prepare_cifar10.py --root "D:\ESTR3114\project\CIFAR-10\dataset"
 ```
 
 脚本只使用 Python 标准库，准备数据时不需要安装 PyTorch。请预留至少 1 GiB 可用空间，用于约 163 MiB 的压缩包、约 178 MiB 的解压数据及临时文件。完整压缩包会保留在数据目录；中断后重新运行同一命令即可在服务器支持 HTTP Range 时续传，服务器不支持时会重新下载。
@@ -40,7 +40,7 @@ py -3 scripts/prepare_cifar10.py --verify-only
 
 ```json
 {
-  "data_root": "D:\\ESTR3108\\project\\CIFAR-10\\dataset",
+  "data_root": "D:\\ESTR3114\\project\\CIFAR-10\\dataset",
   "download": false
 }
 ```
@@ -61,7 +61,7 @@ py -3 -m scripts.run_suite --config configs/windows/cifar10_pilot.json --output 
 py -3 -m scripts.run_tuning --config configs/windows/cifar10_tuning.json --output runs/cifar10_tuning_windows
 ```
 
-训练完成后，还需要按仓库 README 的 `scripts.export_images`、`scripts.evaluate_images` 流程，对每个 pilot 和成功完成的调参运行，在最终 checkpoint 生成 2,000 张图像的验证集 FID/KID 记录。导出时将 `--data-root` 设置为 `"D:\ESTR3108\project\CIFAR-10\dataset"`，并使用各运行目录中的真实 checkpoint。
+训练完成后，还需要按仓库 README 的 `scripts.export_images`、`scripts.evaluate_images` 流程，对每个 pilot 和成功完成的调参运行，在最终 checkpoint 生成 2,000 张图像的验证集 FID/KID 记录。导出时将 `--data-root` 设置为 `"D:\ESTR3114\project\CIFAR-10\dataset"`，并使用各运行目录中的真实 checkpoint。
 
 正式实验必须先有四法在实际 GPU 上完成的 pilot、测得的训练耗时与峰值显存、完整调参尝试，以及有效的验证指标记录。`scripts.freeze_protocol` 根据这些证据和实际可用 GPU 小时检查统一预算，生成 `freeze.json`；脚本给出的运行时间是基于实测 pilot 的估算，预算与指标应以实际运行记录为依据。
 
@@ -85,3 +85,7 @@ py -3 -m scripts.run_suite --config configs/windows/cifar10_main.json --output r
 
 - [多伦多大学 CIFAR-10 页面](https://www.cs.toronto.edu/~kriz/cifar.html)：数据规模、Python 压缩包和 MD5。
 - [torchvision 0.20 CIFAR-10 实现](https://docs.pytorch.org/vision/0.20/_modules/torchvision/datasets/cifar.html)：压缩包 URL、解压目录名及各批次、元数据文件的 MD5。
+
+## 历史实验版本
+
+八高斯第三轮的冻结配置与原始记录对应提交 `956ce83ffbec9992f609cc0233bea740a95181ac`。如需重算该历史实验，请先检出该提交；当前 CIFAR-10 下载和 Windows 配置使用上方更正后的 ESTR3114 目录。

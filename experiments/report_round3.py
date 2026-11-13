@@ -380,10 +380,10 @@ python -m experiments.run_round3 collect --phase reporting
 python -m experiments.report_round3 --results results/round3
 ```
 
-本次报告环境为{environment['system']}，CUDA检测为`{environment['cuda_available']}`；当前Linux不能写入本机D盘，未完成CIFAR-10训练或FID/KID。请在Windows运行以下下载、校验命令，目标固定为`D:\\ESTR3108\\project\\CIFAR-10\\dataset`；详见[本机步骤](../../docs/cifar10-windows-zh.md)及[配置](../../configs/windows/cifar10_pilot.json)。
+本次报告环境为{environment['system']}，CUDA检测为`{environment['cuda_available']}`；当前Linux不能写入本机D盘，未完成CIFAR-10训练或FID/KID。请在Windows运行以下下载、校验命令，目标固定为`D:\\ESTR3114\\project\\CIFAR-10\\dataset`；详见[本机步骤](../../docs/cifar10-windows-zh.md)及[配置](../../configs/windows/cifar10_pilot.json)。
 
 ```powershell
-py -3 scripts/prepare_cifar10.py --root "D:\\ESTR3108\\project\\CIFAR-10\\dataset"
+py -3 scripts/prepare_cifar10.py --root "D:\\ESTR3114\\project\\CIFAR-10\\dataset"
 py -3 scripts/prepare_cifar10.py --verify-only
 ```
 '''
@@ -424,7 +424,7 @@ def report(results='results/round3', round2='results/round2'):
     check_fields(read_json(root/'target_control.json'), control, 'BatchStream target control')
     archived = _archived_reference(round2)
     environment = {'system': platform.system(), 'cuda_available': torch.cuda.is_available(),
-        'windows_target': r'D:\ESTR3108\project\CIFAR-10\dataset',
+        'windows_target': r'D:\ESTR3114\project\CIFAR-10\dataset',
         'windows_download_performed_here': False, 'image_training_or_fid_kid_performed': False}
     validation = {'schema_version': 1, 'passed': True, 'condition': PRIMARY_CONDITION,
         'source_hash': source_hash(), 'protocol_code_hashes': protocol_code_hashes(),

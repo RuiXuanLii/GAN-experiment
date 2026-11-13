@@ -33,7 +33,7 @@ def test_default_windows_root_fails_without_creating_a_fake_drive(tmp_path):
 @pytest.mark.skipif(os.name == "nt", reason="POSIX Windows-path guard")
 def test_explicit_windows_root_is_also_rejected_on_posix():
     with pytest.raises(ValueError, match="Windows"):
-        prepare.resolve_root(r"D:\ESTR3108\project\CIFAR-10\dataset")
+        prepare.resolve_root(r"D:\ESTR3114\project\CIFAR-10\dataset")
 
 
 def test_explicit_local_root_is_permitted_on_posix(tmp_path):
@@ -284,7 +284,7 @@ def test_windows_configs_preserve_protocol_defaults_except_dataset_location(stag
     assert windows_path.is_file(), f"Windows {stage} config is missing"
     windows = json.loads(windows_path.read_text())
     generic = json.loads((config_root / f"cifar10_{stage}.json").read_text())
-    assert windows["data_root"] == r"D:\ESTR3108\project\CIFAR-10\dataset"
+    assert windows["data_root"] == r"D:\ESTR3114\project\CIFAR-10\dataset"
     assert windows["download"] is False
     windows["data_root"] = generic["data_root"]
     assert windows == generic

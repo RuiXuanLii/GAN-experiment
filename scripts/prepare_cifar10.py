@@ -12,7 +12,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 
-DEFAULT_ROOT = r"D:\ESTR3108\project\CIFAR-10\dataset"
+DEFAULT_ROOT = r"D:\ESTR3114\project\CIFAR-10\dataset"
 URL = "https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz"
 ARCHIVE_NAME = "cifar-10-python.tar.gz"
 ARCHIVE_MD5 = "c58f30108f718f92721af3b95e74349a"

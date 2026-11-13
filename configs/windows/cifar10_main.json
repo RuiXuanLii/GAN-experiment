@@ -24,7 +24,7 @@
   "lookahead_alpha": 0.5,
   "device": "cuda",
   "threads": 1,
-  "data_root": "D:\\ESTR3108\\project\\CIFAR-10\\dataset",
+  "data_root": "D:\\ESTR3114\\project\\CIFAR-10\\dataset",
   "download": false,
   "eval_samples": 64,
   "keep_checkpoints": true,

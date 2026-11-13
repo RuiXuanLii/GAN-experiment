@@ -44,7 +44,7 @@ python -m scripts.plot_runs --runs runs/round1/extended --output runs/gaussian_e
 
 第三轮完成12组调参和12组新种子四优化器比较，结果、波动与冻结协议见 [results/round3](results/round3/README.md)。
 
-Windows 的 CIFAR-10 下载及三套实验配置使用 `D:\ESTR3108\project\CIFAR-10\dataset`，操作见 [本机准备说明](docs/cifar10-windows-zh.md)。
+Windows 的 CIFAR-10 下载及三套实验配置使用 `D:\ESTR3114\project\CIFAR-10\dataset`，操作见 [本机准备说明](docs/cifar10-windows-zh.md)。
 
 ## CIFAR-10 pilot
 
@@ -60,3 +60,5 @@ python -m scripts.evaluate_images --folder RUN_DIR/evaluation --cuda
 用实际输出目录替换 `RUN_DIR`。四法都要测耗时与峰值显存，并跑通预训练 Inception 特征的验证 FID/KID，再确定正式预算。`configs/cifar10_main.json` 需要用 `scripts.freeze_protocol` 从实际 pilot 和调参结果生成冻结配置。
 
 算法公式和双线性推导见 [数学笔记](docs/mathematical-notes-zh.md)。论文和第三方测试代码的出处见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+历史八高斯第三轮的重算与核验请使用固定实验版本 `956ce83ffbec9992f609cc0233bea740a95181ac`；当前 CIFAR-10 路径以本机准备说明为准。
