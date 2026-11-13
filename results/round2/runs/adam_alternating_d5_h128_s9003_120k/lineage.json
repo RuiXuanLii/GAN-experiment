@@ -1,0 +1,17 @@
+{
+  "parent_run": "runs/round2/adam_alternating_d5_h128_s9003",
+  "parent_checkpoint_sha256": "8f68be24040ce8a9a1c17cb4761cb3c66686c6a2cef1937188b842eb9cee7721",
+  "parent_oracle_calls": 60000,
+  "parent_g_updates": 10000,
+  "parent_d_updates": 50000,
+  "parent_config_hash": "dfc0a95d24591684389636a6cb52496b6837f45ef37143f669b562c2c93f4815",
+  "config_changes": {
+    "oracle_budget": {
+      "from": 60000,
+      "to": 120000
+    }
+  },
+  "parent_driver_sha256": "8415c75fcec15fad73634a23d8564b9bff8140cd7ff52871ed9c995d6fbfa143",
+  "continuation_driver_sha256": "c4915b9494fc4b776c46dd3b4d6cfd64a97b7a611eb19d6362fd74dd88e79d2b",
+  "driver_migration": "Known crash-resume CSV consistency hardening only; numerical transitions unchanged."
+}

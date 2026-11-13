@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "oracle_calls": 30000,
+  "parameter_updates": 30000,
+  "training_seconds": 75.5338193329535,
+  "wall_seconds": 79.86496895900018,
+  "diagnostic_only": true,
+  "image_metrics_executed": false,
+  "covered_modes": 0,
+  "quality_fraction": 0.0,
+  "mean_nearest_distance": 1.2838851160474407,
+  "assignment_entropy": -0.0
+}

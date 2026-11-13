@@ -1,0 +1,11 @@
+{
+  "original_training_commit": "4550d55d91c5f452a507eb019eccc0c8cb621872",
+  "original_local_commit": "664e13160e8e4ffeb015fbc970fb3d86cb67de06",
+  "original_source_hash": "ba49d2b12b7b7847b4dc392cc6c5922695471c413dbdbc3ad18689dcae998a26",
+  "relu_source_hash": "4a0ecdc4df437e061dd502c5ba1c6117dbc460485f198c11702bcf388cd5f9b9",
+  "alternating_run_script": "evidence/round2/alternating_reference_at_run.py",
+  "alternating_run_script_sha256": "8415c75fcec15fad73634a23d8564b9bff8140cd7ff52871ed9c995d6fbfa143",
+  "note": "Snapshot preserves the exact diagnostic driver used for the first alternating runs. Later resume-log hardening does not change uninterrupted updates.",
+  "experiments/alternating_reference.py": "c4915b9494fc4b776c46dd3b4d6cfd64a97b7a611eb19d6362fd74dd88e79d2b",
+  "experiments/extend_alternating.py": "299e77ae408edbb7530f53f2099a5534a1821c76c7ffced1843ec5d4ca475d19"
+}

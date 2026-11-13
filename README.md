@@ -40,6 +40,8 @@ python -m scripts.plot_runs --runs runs/round1/extended --output runs/gaussian_e
 
 第一轮结果、配置和运行记录见 [results/round1](results/round1/README.md)。
 
+第二轮八高斯诊断、三种子交替训练基线与学习曲线见 [results/round2](results/round2/README.md)。
+
 ## CIFAR-10 pilot
 
 在可用的 CUDA 环境中准备 CIFAR-10，并在 `configs/cifar10_pilot.json` 设置 `data_root`。需要由 torchvision 下载数据时，将 `download` 设为 `true`。

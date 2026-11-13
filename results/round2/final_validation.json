@@ -1,0 +1,58 @@
+{
+  "seeds": [
+    9001,
+    9002,
+    9003
+  ],
+  "total_calls_per_trajectory": 120000,
+  "g_updates": 20000,
+  "d_updates": 100000,
+  "mean_quality_fraction": 0.7916666666666666,
+  "std_quality_fraction": 0.014396708585609362,
+  "mean_nearest_distance": 0.13279843033277358,
+  "all_final_modes_covered": true,
+  "all_final_quality_at_least_50pct": true,
+  "tail_per_seed": {
+    "9001": {
+      "calls": [
+        96000,
+        102000,
+        108000,
+        114000,
+        120000
+      ],
+      "minimum_covered_modes": 8,
+      "minimum_quality_fraction": 0.7353515625,
+      "maximum_quality_fraction": 0.796875
+    },
+    "9002": {
+      "calls": [
+        96000,
+        102000,
+        108000,
+        114000,
+        120000
+      ],
+      "minimum_covered_modes": 8,
+      "minimum_quality_fraction": 0.736328125,
+      "maximum_quality_fraction": 0.802734375
+    },
+    "9003": {
+      "calls": [
+        96000,
+        102000,
+        108000,
+        114000,
+        120000
+      ],
+      "minimum_covered_modes": 8,
+      "minimum_quality_fraction": 0.697265625,
+      "maximum_quality_fraction": 0.775390625
+    }
+  },
+  "all_last_five_checkpoints_meet_target": true,
+  "unique_training_field_calls_this_round": 570000,
+  "frozen_g_probe_field_calls": 2000,
+  "independent_initialized_training_runs": 9,
+  "continuation_folders": 3
+}

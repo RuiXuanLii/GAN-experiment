@@ -1,0 +1,14 @@
+[
+  "adam_alternating_d1_h128",
+  "adam_alternating_d5_h128",
+  "adam_alternating_d5_h128_s9001_120k",
+  "adam_alternating_d5_h128_s9002",
+  "adam_alternating_d5_h128_s9002_120k",
+  "adam_alternating_d5_h128_s9003",
+  "adam_alternating_d5_h128_s9003_120k",
+  "adam_duration",
+  "adam_gp01",
+  "adam_relu_gp01",
+  "adam_relu_gp10",
+  "adam_relu_h128_gp01"
+]

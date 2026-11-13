@@ -33,8 +33,12 @@ def make_models(config):
     z=config['z_dim']
     if config['dataset']=='synthetic':
         h=config.get('hidden',32)
+        activation=config.get('critic_activation','softplus')
+        if activation not in ['softplus','relu']:
+            raise ValueError('critic_activation must be softplus or relu')
+        critic_activation=nn.Softplus if activation=='softplus' else nn.ReLU
         G=nn.Sequential(nn.Linear(z,h),nn.ReLU(),nn.Linear(h,h),nn.ReLU(),nn.Linear(h,2))
-        D=nn.Sequential(nn.Linear(2,h),nn.Softplus(),nn.Linear(h,h),nn.Softplus(),nn.Linear(h,1))
+        D=nn.Sequential(nn.Linear(2,h),critic_activation(),nn.Linear(h,h),critic_activation(),nn.Linear(h,1))
         return G,D
     if config['dataset'] not in ['cifar10','mnist']: raise ValueError('Unknown dataset')
     b=config['base_channels']

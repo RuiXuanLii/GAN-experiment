@@ -1,0 +1,60 @@
+{
+  "experiment_id": "adam_alternating_d5_h128_s9003_120k",
+  "source_hash": "4a0ecdc4df437e061dd502c5ba1c6117dbc460485f198c11702bcf388cd5f9b9",
+  "experiment_script_sha256": "c4915b9494fc4b776c46dd3b4d6cfd64a97b7a611eb19d6362fd74dd88e79d2b",
+  "config_hash": "75c87a8544b43c1bcde792489cf973277e5eb2aed88f67a691d8d7058ecb7cb4",
+  "initial_parameter_hash": "0ac82ed83788dbe37cc3e932ec26bae57d9a255d1846a3550e5cd3f944fbee42",
+  "split_hash": "synthetic-radius2-std0.05-eightmodes",
+  "config": {
+    "protocol": "v1.0",
+    "stage": "pilot",
+    "dataset": "synthetic",
+    "algorithm": "adam",
+    "seed": 9003,
+    "split_seed": 2026,
+    "batch_size": 64,
+    "z_dim": 8,
+    "hidden": 128,
+    "base_channels": 32,
+    "lr": 0.0001,
+    "betas": [
+      0.5,
+      0.9
+    ],
+    "eps": 1e-08,
+    "gp_lambda": 0.1,
+    "oracle_budget": 120000,
+    "log_every": 600,
+    "checkpoint_every": 6000,
+    "extra_batch": "independent",
+    "lookahead_k": 5,
+    "lookahead_alpha": 0.5,
+    "device": "cpu",
+    "threads": 1,
+    "data_root": "data",
+    "download": false,
+    "eval_samples": 2048,
+    "keep_checkpoints": true,
+    "critic_activation": "relu",
+    "training_schedule": "alternating",
+    "critic_steps": 5
+  },
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "packages": {
+      "torch": "2.5.1+cpu",
+      "torchvision": "0.20.1+cpu",
+      "numpy": "2.3.5",
+      "matplotlib": "3.10.8",
+      "pytest": "9.2.0",
+      "torch-fidelity": null
+    },
+    "cuda_available": false,
+    "torch_cuda_build": null,
+    "device_name": null,
+    "cuda_total_memory_mb": null
+  },
+  "counting": "Full joint field evaluated each call; only active block applied; both partial gradients counted.",
+  "evaluation_status": "Adam-only schedule diagnostic, not four-optimizer benchmark"
+}

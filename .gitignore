@@ -4,7 +4,7 @@ __pycache__/
 .venv/
 .env
 data/
-runs/
+/runs/
 *.pt
 *.pth
 freeze.json
@@ -12,3 +12,7 @@ results/round1/bilinear_adaptive/trajectory.csv
 results/round1/synthetic_figures/training_diagnostics.png
 results/round1/synthetic_runs/**/metrics.jsonl
 results/round1/synthetic_runs/**/samples.npy
+results/round2/*_red.txt
+results/round2/collection.txt
+results/round2/probe_console.txt
+results/round2/progress_notes.txt

@@ -1,0 +1,15 @@
+{
+  "status": "paused",
+  "oracle_calls": 18000,
+  "player_gradient_calls": 36000,
+  "parameter_updates": 18000,
+  "g_updates": 3000,
+  "d_updates": 15000,
+  "training_seconds": 48.66125905799663,
+  "diagnostic_only": true,
+  "image_metrics_executed": false,
+  "covered_modes": 7,
+  "quality_fraction": 0.1123046875,
+  "mean_nearest_distance": 0.4862183177417667,
+  "assignment_entropy": 2.078490177954686
+}
