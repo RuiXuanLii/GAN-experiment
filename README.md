@@ -42,6 +42,10 @@ python -m scripts.plot_runs --runs runs/round1/extended --output runs/gaussian_e
 
 第二轮八高斯诊断、三种子交替训练基线与学习曲线见 [results/round2](results/round2/README.md)。
 
+第三轮完成12组调参和12组新种子四优化器比较，结果、波动与冻结协议见 [results/round3](results/round3/README.md)。
+
+Windows 的 CIFAR-10 下载及三套实验配置使用 `D:\ESTR3108\project\CIFAR-10\dataset`，操作见 [本机准备说明](docs/cifar10-windows-zh.md)。
+
 ## CIFAR-10 pilot
 
 在可用的 CUDA 环境中准备 CIFAR-10，并在 `configs/cifar10_pilot.json` 设置 `data_root`。需要由 torchvision 下载数据时，将 `download` 设为 `true`。

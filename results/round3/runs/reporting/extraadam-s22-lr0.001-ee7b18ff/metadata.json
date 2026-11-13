@@ -1,0 +1,62 @@
+{
+  "experiment_id": "round3_reporting-synthetic-extraadam-s22-ee7b18ff",
+  "config_hash": "ee7b18ff71624701b6533a1b6f76e8860c16bc8de5cb67833ad48b77341021ee",
+  "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7",
+  "initial_parameter_hash": "911a2265770f87c02299bdf501a23b4b6ccaa83225cfafaaf37b8834e8d568c0",
+  "split_hash": "synthetic-radius2-std0.05-eightmodes",
+  "parameter_count": 34947,
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "packages": {
+      "torch": "2.5.1+cpu",
+      "torchvision": "0.20.1+cpu",
+      "numpy": "2.3.5",
+      "matplotlib": "3.10.8",
+      "pytest": "9.2.0",
+      "torch-fidelity": null
+    },
+    "cuda_available": false,
+    "torch_cuda_build": null,
+    "device_name": null,
+    "cuda_total_memory_mb": null
+  },
+  "evaluation_status": "synthetic diagnostics only",
+  "config": {
+    "algorithm": "extraadam",
+    "base_channels": 32,
+    "batch_size": 64,
+    "betas": [
+      0.5,
+      0.9
+    ],
+    "checkpoint_every": 6000,
+    "critic_activation": "relu",
+    "critic_steps": 1,
+    "data_root": "data",
+    "dataset": "synthetic",
+    "device": "cpu",
+    "download": false,
+    "eps": 1e-08,
+    "eval_samples": 2048,
+    "extra_batch": "independent",
+    "freeze_file": "runs/round3/protocol_freeze.json",
+    "gp_lambda": 0.1,
+    "hidden": 128,
+    "keep_checkpoints": true,
+    "log_every": 1200,
+    "lookahead_alpha": 0.5,
+    "lookahead_k": 5,
+    "lr": 0.001,
+    "oracle_budget": 120000,
+    "protocol": "v1.0",
+    "round3_freeze_hash": "821e76f137617feb59e27f389eb207f621d983c7c02f02b10d0c4f6eb04d2cba",
+    "round3_source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7",
+    "seed": 22,
+    "split_seed": 2026,
+    "stage": "round3_reporting",
+    "threads": 1,
+    "training_schedule": "synchronous",
+    "z_dim": 8
+  }
+}

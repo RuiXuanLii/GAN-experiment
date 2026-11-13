@@ -328,8 +328,10 @@ def _figure(root, summaries, checkpoints, samples, reference):
         values = 100*np.array([[float(r['quality_fraction']) for r in rows] for rows in series])
         mean, sd = values.mean(axis=0), values.std(axis=0, ddof=1)
         line, = axis.plot(calls, mean, label=LABELS[method], linewidth=1.5)
-        axis.fill_between(calls, mean-sd, mean+sd, color=line.get_color(), alpha=.12, linewidth=0)
-    axis.set(xlabel='Joint field calls (thousands)', ylabel='Quality fraction (%)', title='Three fresh seeds: mean ± sample SD')
+        axis.fill_between(calls, np.maximum(0, mean-sd), np.minimum(100, mean+sd),
+                          color=line.get_color(), alpha=.12, linewidth=0)
+    axis.set(xlabel='Joint field calls (thousands)', ylabel='Quality fraction (%)',
+             ylim=(0, 100), title='Three fresh seeds: mean ± sample SD')
     axis.grid(alpha=.2)
     axis.legend(fontsize=7)
     figure.savefig(root/'comparison.png', dpi=160)
@@ -352,15 +354,15 @@ def _readme(root, stats, reference, environment):
 |---|---:|---:|---:|---:|---:|
 {final_table}
 
-±为三种子间样本标准差。末5为96k至120k、间隔6k；合格半径严格小于0.15，每团至少21/2048个合格点算覆盖。下表时间标准差按各种子末5点计算，不能单凭波动小认定训练稳定；最低覆盖取三种子合计15个末段检查点。
+±为三种子间样本标准差。末5为96k至120k、间隔6k；合格半径严格小于0.15，每团至少21/2048个合格点算覆盖。下表波动标准差沿各种子末5个检查点计算，不能单凭波动小认定训练稳定；最低覆盖取三种子合计15个末段检查点。选中学习率是三档候选内的结果，且均位于候选上界，不代表充分搜索后的最优值。
 
-| 方法 | 末5合格率时间SD：11 / 22 / 33（百分点） | 15点最低覆盖 | 15点最低合格率 |
+| 方法 | 末5合格率波动SD：11 / 22 / 33（百分点） | 15点最低覆盖 | 15点最低合格率 |
 |---|---:|---:|---:|
 {stability_table}
 
 ![固定seed11终点、真实对照及三种子均值曲线](comparison.png)
 
-四法均展示预先固定的seed11终点，包含全部2048点；坐标按全数据扩展。真实对照复用收集器的BatchStream。曲线为三种子均值±样本SD。完整12项结果均保留，未用最佳检查点替代终点。这是三种子的探索性比较，不保证普遍收敛或统计显著性；并行CPU耗时不作速度排名。
+四法均展示预先固定的seed11终点，包含全部2048点；坐标按全数据扩展。真实对照复用收集器的BatchStream。曲线为三种子均值±样本SD，阴影按百分比范围0–100%截取。完整12项结果均保留，未用最佳检查点替代终点。覆盖和合格率不能充分评价团内分布形状。这是三种子的探索性比较，不保证普遍收敛或统计显著性；并行CPU耗时不作速度排名。
 
 第二轮Adam交替5:1参考合格率为{100*reference['quality_mean']:.2f}%±{100*reference['quality_sample_sd']:.2f}个百分点，属于不同训练条件，不纳入本轮均值或排名；见[原结果](../round2/README.md)和[原CSV](../round2/summary.csv)。
 
