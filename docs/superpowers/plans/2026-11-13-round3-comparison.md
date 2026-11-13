@@ -24,11 +24,11 @@ Use canonical joint1:1, not naive per-player5:1 wrappers. Common architecture h1
 
 ## Tasks
 
-- [ ] Implement `experiments/run_round3.py`: prepare tuning configs/manifests, call existing train, verify evidence and freeze, create reporting configs. Verify with meaningful freeze/selection/budget tests.
-- [ ] Implement `experiments/collect_round3.py`: evaluate checkpoints, validate final samples/counts, archive exact run artifacts, plot primary comparison and separate schedule reference. Verify from actual outputs; no best-checkpoint replacement.
-- [ ] Implement Windows-only-default CIFAR preparation, checksum verification, exact-path config and Chinese instructions; test tiny local fixtures only.
-- [ ] Review math/protocol and new code independently; run full unit suite; lock core/scripts source before training.
-- [ ] Run all12 tuning candidates; verify counts, source and init hashes; freeze selections.
+- [x] Implement `experiments/run_round3.py`: prepare tuning configs/manifests, call existing train, verify evidence and freeze, create reporting configs. Verify with meaningful freeze/selection/budget tests.
+- [x] Implement `experiments/collect_round3.py`: evaluate checkpoints, validate final samples/counts, archive exact run artifacts, plot primary comparison and separate schedule reference. Verify from actual outputs; no best-checkpoint replacement.
+- [x] Implement Windows-only-default CIFAR preparation, checksum verification, exact-path config and Chinese instructions; test tiny local fixtures only.
+- [x] Review math/protocol and new code independently; run full unit suite; lock core/scripts source before training.
+- [x] Run all12 tuning candidates; verify counts, source and init hashes; freeze selections.
 - [ ] Run all12 reporting jobs from frozen selections; collect final and末5 statistics, generate and inspect plots.
 - [ ] Write concise Chinese results/limitations and local Windows download command; test/hash, commit, push to existing authorized repo and verify remote files.
 

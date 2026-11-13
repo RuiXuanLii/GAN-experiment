@@ -28,7 +28,15 @@ py -3 scripts/prepare_cifar10.py --verify-only
 
 ## 连接本项目训练
 
-已提供 [Windows pilot 配置](../configs/windows/cifar10_pilot.json)，其中：
+已提供三个 Windows 配置；除数据目录外，其参数与对应的通用配置相同：
+
+| 阶段 | 配置 | 用途 |
+| --- | --- | --- |
+| pilot | [cifar10_pilot.json](../configs/windows/cifar10_pilot.json) | 四法各运行 200 次联合梯度调用，测量 CUDA 耗时和显存，并验证图像评估流程 |
+| tuning | [cifar10_tuning.json](../configs/windows/cifar10_tuning.json) | 四法各尝试三种学习率，每次 2,000 次联合梯度调用 |
+| main | [cifar10_main.json](../configs/windows/cifar10_main.json) | 待与冻结结果对齐的正式实验模板；需要有效的 `freeze.json` |
+
+三个配置均设置：
 
 ```json
 {
@@ -45,7 +53,31 @@ py -3 scripts/prepare_cifar10.py --verify-only
 py -3 -m scripts.run_suite --config configs/windows/cifar10_pilot.json --output runs/cifar10_pilot_windows
 ```
 
-该配置使用 `device: cuda`，需要所用 Python 环境中的 `torch.cuda.is_available()` 为 `True`。如果项目依赖安装在已激活的虚拟环境中，可将命令的 `py -3` 换成该环境的 `python`。
+三个配置均使用 `device: cuda`，需要所用 Python 环境中的 `torch.cuda.is_available()` 为 `True`。如果项目依赖安装在已激活的虚拟环境中，可将命令的 `py -3` 换成该环境的 `python`。
+
+随后使用三种学习率进行调参：
+
+```powershell
+py -3 -m scripts.run_tuning --config configs/windows/cifar10_tuning.json --output runs/cifar10_tuning_windows
+```
+
+训练完成后，还需要按仓库 README 的 `scripts.export_images`、`scripts.evaluate_images` 流程，对每个 pilot 和成功完成的调参运行，在最终 checkpoint 生成 2,000 张图像的验证集 FID/KID 记录。导出时将 `--data-root` 设置为 `"D:\ESTR3108\project\CIFAR-10\dataset"`，并使用各运行目录中的真实 checkpoint。
+
+正式实验必须先有四法在实际 GPU 上完成的 pilot、测得的训练耗时与峰值显存、完整调参尝试，以及有效的验证指标记录。`scripts.freeze_protocol` 根据这些证据和实际可用 GPU 小时检查统一预算，生成 `freeze.json`；脚本给出的运行时间是基于实测 pilot 的估算，预算与指标应以实际运行记录为依据。
+
+在 PowerShell 中，先将 `$AvailableGpuHours` 设为实际剩余可用 GPU 小时，将 `$MainOracleBudget` 设为根据实测结果选择的四法统一联合梯度调用预算（10 的正整数倍），再运行：
+
+```powershell
+py -3 -m scripts.freeze_protocol --pilot runs/cifar10_pilot_windows --tuning runs/cifar10_tuning_windows --output freeze.json --gpu-hours $AvailableGpuHours --budget $MainOracleBudget
+```
+
+`configs/windows/cifar10_main.json` 保留 `"freeze_file": "freeze.json"`。这是待与冻结结果对齐的模板，预置的 `lr: 0.0001` 和 `oracle_budget: 20000` 不是调参或资源测量的结论。正式实验中各方法的学习率与统一预算都必须符合实际 `freeze.json`：下方的 `scripts.run_suite` 命令会按冻结结果覆盖各方法学习率，但仍需先将模板中的 `oracle_budget` 改为冻结预算，并确保日志和 checkpoint 间隔与所选预算及方法周期兼容。冻结后保持训练与评估源码不变，在仓库根目录运行正式实验：
+
+```powershell
+py -3 -m scripts.run_suite --config configs/windows/cifar10_main.json --output runs/cifar10_main_windows
+```
+
+正式实验会采用冻结文件中每种方法选出的学习率和报告种子 `11、22、33`；缺失或不匹配的冻结证据会阻止启动。
 
 项目从官方 50,000 张训练图像中，以 `split_seed: 2026` 固定划分 45,000 张训练图像和 5,000 张验证图像。官方测试批次虽然随压缩包一并准备，但应留给协议冻结后的正式实验最终评估，不用于 pilot 或调参。
 

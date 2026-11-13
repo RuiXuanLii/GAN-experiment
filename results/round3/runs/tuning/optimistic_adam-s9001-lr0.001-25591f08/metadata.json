@@ -1,0 +1,60 @@
+{
+  "experiment_id": "round3_tuning-synthetic-optimistic_adam-s9001-25591f08",
+  "config_hash": "25591f08ea2785027511fea9229fd36a53b899c4ab51c961a899d1fb13f80f67",
+  "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7",
+  "initial_parameter_hash": "59e699de2f0f24d7c727f001866af14018258aa57dc25c9d892dfecfa28fce7f",
+  "split_hash": "synthetic-radius2-std0.05-eightmodes",
+  "parameter_count": 34947,
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "packages": {
+      "torch": "2.5.1+cpu",
+      "torchvision": "0.20.1+cpu",
+      "numpy": "2.3.5",
+      "matplotlib": "3.10.8",
+      "pytest": "9.2.0",
+      "torch-fidelity": null
+    },
+    "cuda_available": false,
+    "torch_cuda_build": null,
+    "device_name": null,
+    "cuda_total_memory_mb": null
+  },
+  "evaluation_status": "synthetic diagnostics only",
+  "config": {
+    "algorithm": "optimistic_adam",
+    "base_channels": 32,
+    "batch_size": 64,
+    "betas": [
+      0.5,
+      0.9
+    ],
+    "checkpoint_every": 6000,
+    "critic_activation": "relu",
+    "critic_steps": 1,
+    "data_root": "data",
+    "dataset": "synthetic",
+    "device": "cpu",
+    "download": false,
+    "eps": 1e-08,
+    "eval_samples": 2048,
+    "extra_batch": "independent",
+    "gp_lambda": 0.1,
+    "hidden": 128,
+    "keep_checkpoints": true,
+    "log_every": 1200,
+    "lookahead_alpha": 0.5,
+    "lookahead_k": 5,
+    "lr": 0.001,
+    "oracle_budget": 120000,
+    "protocol": "v1.0",
+    "round3_source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7",
+    "seed": 9001,
+    "split_seed": 2026,
+    "stage": "round3_tuning",
+    "threads": 1,
+    "training_schedule": "synchronous",
+    "z_dim": 8
+  }
+}

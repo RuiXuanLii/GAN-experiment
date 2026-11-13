@@ -1,0 +1,8 @@
+{
+  "seed": 123456,
+  "samples": 2048,
+  "covered_modes": 8,
+  "quality_fraction": 0.99462890625,
+  "mean_nearest_distance": 0.06203457358638258,
+  "assignment_entropy": 2.077007814534822
+}

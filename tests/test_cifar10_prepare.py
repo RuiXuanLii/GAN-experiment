@@ -3,6 +3,7 @@ from contextlib import contextmanager
 import hashlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import io
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -274,3 +275,16 @@ def test_verified_dataset_skips_download_on_rerun(tmp_path, tiny_batches, capsys
     output = capsys.readouterr().out
     assert "50,000" in output and "10,000" in output
     assert not (tmp_path / "cifar-10-python.tar.gz").exists()
+
+
+@pytest.mark.parametrize("stage", ["pilot", "tuning", "main"])
+def test_windows_configs_preserve_protocol_defaults_except_dataset_location(stage):
+    config_root = SCRIPT.parents[1] / "configs"
+    windows_path = config_root / "windows" / f"cifar10_{stage}.json"
+    assert windows_path.is_file(), f"Windows {stage} config is missing"
+    windows = json.loads(windows_path.read_text())
+    generic = json.loads((config_root / f"cifar10_{stage}.json").read_text())
+    assert windows["data_root"] == r"D:\ESTR3108\project\CIFAR-10\dataset"
+    assert windows["download"] is False
+    windows["data_root"] = generic["data_root"]
+    assert windows == generic

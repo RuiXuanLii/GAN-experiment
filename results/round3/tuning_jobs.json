@@ -1,0 +1,113 @@
+{
+  "condition": "canonical joint synchronous 1:1, all four METHODS",
+  "evaluation": {
+    "metrics": "ganopt.metrics.synthetic_metrics unchanged",
+    "samples": 2048,
+    "seed": 123456
+  },
+  "jobs": [
+    {
+      "config": "runs/round3/configs/tuning/adam-s9001-lr0.0001-91c91c9c.json",
+      "config_hash": "91c91c9c056dc711fae6a74106285373a967acbc626d6ee5c188e69a3ed4fabf",
+      "expected_initial_parameter_hash": "59e699de2f0f24d7c727f001866af14018258aa57dc25c9d892dfecfa28fce7f",
+      "job_id": "adam-s9001-lr0.0001-91c91c9c",
+      "output": "runs/round3/runs/tuning/adam-s9001-lr0.0001-91c91c9c",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/tuning/adam-s9001-lr0.0003-56fca7ae.json",
+      "config_hash": "56fca7ae347e265a3ba4afdf1619afa193bd1944307b1313bd14c9a46caa552b",
+      "expected_initial_parameter_hash": "59e699de2f0f24d7c727f001866af14018258aa57dc25c9d892dfecfa28fce7f",
+      "job_id": "adam-s9001-lr0.0003-56fca7ae",
+      "output": "runs/round3/runs/tuning/adam-s9001-lr0.0003-56fca7ae",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/tuning/adam-s9001-lr0.001-7cfbad02.json",
+      "config_hash": "7cfbad02cfc8f9e07370288272b0430e3f413ebbd72375ff8c84403fd8424183",
+      "expected_initial_parameter_hash": "59e699de2f0f24d7c727f001866af14018258aa57dc25c9d892dfecfa28fce7f",
+      "job_id": "adam-s9001-lr0.001-7cfbad02",
+      "output": "runs/round3/runs/tuning/adam-s9001-lr0.001-7cfbad02",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/tuning/extraadam-s9001-lr0.0001-e61dd5b8.json",
+      "config_hash": "e61dd5b81d121631083e98ff67b6c470e69c3b9d2376a774507d6443fb0eb7b4",
+      "expected_initial_parameter_hash": "59e699de2f0f24d7c727f001866af14018258aa57dc25c9d892dfecfa28fce7f",
+      "job_id": "extraadam-s9001-lr0.0001-e61dd5b8",
+      "output": "runs/round3/runs/tuning/extraadam-s9001-lr0.0001-e61dd5b8",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/tuning/extraadam-s9001-lr0.0003-936627a2.json",
+      "config_hash": "936627a2a3ebfe9189d42a94e9454d0af47d5a0c4d4c1735846c3e054e23e23f",
+      "expected_initial_parameter_hash": "59e699de2f0f24d7c727f001866af14018258aa57dc25c9d892dfecfa28fce7f",
+      "job_id": "extraadam-s9001-lr0.0003-936627a2",
+      "output": "runs/round3/runs/tuning/extraadam-s9001-lr0.0003-936627a2",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/tuning/extraadam-s9001-lr0.001-a0fa0c97.json",
+      "config_hash": "a0fa0c97d5c38d02d00b6aae30ff333c5309fa5529691c0c1344b73ee25ece6f",
+      "expected_initial_parameter_hash": "59e699de2f0f24d7c727f001866af14018258aa57dc25c9d892dfecfa28fce7f",
+      "job_id": "extraadam-s9001-lr0.001-a0fa0c97",
+      "output": "runs/round3/runs/tuning/extraadam-s9001-lr0.001-a0fa0c97",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/tuning/optimistic_adam-s9001-lr0.0001-0a09a133.json",
+      "config_hash": "0a09a133c8ced686f5cc811060ab0573b7b5520101b096b407512ac317857f39",
+      "expected_initial_parameter_hash": "59e699de2f0f24d7c727f001866af14018258aa57dc25c9d892dfecfa28fce7f",
+      "job_id": "optimistic_adam-s9001-lr0.0001-0a09a133",
+      "output": "runs/round3/runs/tuning/optimistic_adam-s9001-lr0.0001-0a09a133",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/tuning/optimistic_adam-s9001-lr0.0003-ec7f9b02.json",
+      "config_hash": "ec7f9b024c1eb0186809824e1a9e4bd47b816bf93c5fec54f3ee55e7015b6646",
+      "expected_initial_parameter_hash": "59e699de2f0f24d7c727f001866af14018258aa57dc25c9d892dfecfa28fce7f",
+      "job_id": "optimistic_adam-s9001-lr0.0003-ec7f9b02",
+      "output": "runs/round3/runs/tuning/optimistic_adam-s9001-lr0.0003-ec7f9b02",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/tuning/optimistic_adam-s9001-lr0.001-25591f08.json",
+      "config_hash": "25591f08ea2785027511fea9229fd36a53b899c4ab51c961a899d1fb13f80f67",
+      "expected_initial_parameter_hash": "59e699de2f0f24d7c727f001866af14018258aa57dc25c9d892dfecfa28fce7f",
+      "job_id": "optimistic_adam-s9001-lr0.001-25591f08",
+      "output": "runs/round3/runs/tuning/optimistic_adam-s9001-lr0.001-25591f08",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/tuning/lookahead_minmax-s9001-lr0.0001-ecb7a9c6.json",
+      "config_hash": "ecb7a9c67cdf73e2cf68e0b256b73cd3323916991bd96a792bf4fab0ea986f93",
+      "expected_initial_parameter_hash": "59e699de2f0f24d7c727f001866af14018258aa57dc25c9d892dfecfa28fce7f",
+      "job_id": "lookahead_minmax-s9001-lr0.0001-ecb7a9c6",
+      "output": "runs/round3/runs/tuning/lookahead_minmax-s9001-lr0.0001-ecb7a9c6",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/tuning/lookahead_minmax-s9001-lr0.0003-dc736b90.json",
+      "config_hash": "dc736b90a13d0733700a3b2368a0e928deca68e48bbc1793efc5d9cdeabb47ee",
+      "expected_initial_parameter_hash": "59e699de2f0f24d7c727f001866af14018258aa57dc25c9d892dfecfa28fce7f",
+      "job_id": "lookahead_minmax-s9001-lr0.0003-dc736b90",
+      "output": "runs/round3/runs/tuning/lookahead_minmax-s9001-lr0.0003-dc736b90",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/tuning/lookahead_minmax-s9001-lr0.001-942ae514.json",
+      "config_hash": "942ae514f0f47df4e033e39e366475b6f85accb4888be662b353c35a0b0e95fb",
+      "expected_initial_parameter_hash": "59e699de2f0f24d7c727f001866af14018258aa57dc25c9d892dfecfa28fce7f",
+      "job_id": "lookahead_minmax-s9001-lr0.001-942ae514",
+      "output": "runs/round3/runs/tuning/lookahead_minmax-s9001-lr0.001-942ae514",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    }
+  ],
+  "phase": "tuning",
+  "protocol_code_hashes": {
+    "collect_round3.py": "7cee32fdaff098d36c802aaddacacea515f9dda7064cafeeed15cae3044cea4b",
+    "run_round3.py": "66ed16edba090a63f5e4c274535a4ffd8a88bb421fa07b6f1476c832c7a75a4b"
+  },
+  "schema_version": 1,
+  "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+}

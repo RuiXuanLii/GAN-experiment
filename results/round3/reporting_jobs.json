@@ -1,0 +1,113 @@
+{
+  "condition": "canonical joint synchronous 1:1, all four METHODS",
+  "evaluation": {
+    "metrics": "ganopt.metrics.synthetic_metrics unchanged",
+    "samples": 2048,
+    "seed": 123456
+  },
+  "jobs": [
+    {
+      "config": "runs/round3/configs/reporting/adam-s11-lr0.001-62c6d54f.json",
+      "config_hash": "62c6d54f6f2ae4ed925a3daaa4cfd7d85ca3f3d0d75e13d0ffdcd19244245134",
+      "expected_initial_parameter_hash": "07f96b122fb24dc870b735543061f74af3f497c356a9862c6639248441ad0205",
+      "job_id": "adam-s11-lr0.001-62c6d54f",
+      "output": "runs/round3/runs/reporting/adam-s11-lr0.001-62c6d54f",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/reporting/adam-s22-lr0.001-e6b1257f.json",
+      "config_hash": "e6b1257febcfa0b80687e3b805c3ece09020a0552731e65a8f7d2c3ec3af761a",
+      "expected_initial_parameter_hash": "911a2265770f87c02299bdf501a23b4b6ccaa83225cfafaaf37b8834e8d568c0",
+      "job_id": "adam-s22-lr0.001-e6b1257f",
+      "output": "runs/round3/runs/reporting/adam-s22-lr0.001-e6b1257f",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/reporting/adam-s33-lr0.001-ec045686.json",
+      "config_hash": "ec04568692af7cbd23edf166be4bfe25a80be7b99f10538873abe4ab4d49ac92",
+      "expected_initial_parameter_hash": "0433ee69d27676a0a546057be25c24f1d27f4280686aa61f4f17ccc65e990243",
+      "job_id": "adam-s33-lr0.001-ec045686",
+      "output": "runs/round3/runs/reporting/adam-s33-lr0.001-ec045686",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/reporting/extraadam-s11-lr0.001-f07397fc.json",
+      "config_hash": "f07397fc3adda3179bd7e7bc73e8aebfbb81ebacb93d483df4daa3e2b7d8b2c4",
+      "expected_initial_parameter_hash": "07f96b122fb24dc870b735543061f74af3f497c356a9862c6639248441ad0205",
+      "job_id": "extraadam-s11-lr0.001-f07397fc",
+      "output": "runs/round3/runs/reporting/extraadam-s11-lr0.001-f07397fc",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/reporting/extraadam-s22-lr0.001-ee7b18ff.json",
+      "config_hash": "ee7b18ff71624701b6533a1b6f76e8860c16bc8de5cb67833ad48b77341021ee",
+      "expected_initial_parameter_hash": "911a2265770f87c02299bdf501a23b4b6ccaa83225cfafaaf37b8834e8d568c0",
+      "job_id": "extraadam-s22-lr0.001-ee7b18ff",
+      "output": "runs/round3/runs/reporting/extraadam-s22-lr0.001-ee7b18ff",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/reporting/extraadam-s33-lr0.001-a357ab69.json",
+      "config_hash": "a357ab69d46fbd1896dbb23dcacfad5e96b248642c66214ef368bc0688d65fb4",
+      "expected_initial_parameter_hash": "0433ee69d27676a0a546057be25c24f1d27f4280686aa61f4f17ccc65e990243",
+      "job_id": "extraadam-s33-lr0.001-a357ab69",
+      "output": "runs/round3/runs/reporting/extraadam-s33-lr0.001-a357ab69",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/reporting/optimistic_adam-s11-lr0.001-b5ca8523.json",
+      "config_hash": "b5ca852332cfbf715016867b08f912ffff97e2dbe27462afca3a2edaf626c866",
+      "expected_initial_parameter_hash": "07f96b122fb24dc870b735543061f74af3f497c356a9862c6639248441ad0205",
+      "job_id": "optimistic_adam-s11-lr0.001-b5ca8523",
+      "output": "runs/round3/runs/reporting/optimistic_adam-s11-lr0.001-b5ca8523",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/reporting/optimistic_adam-s22-lr0.001-ca320e2f.json",
+      "config_hash": "ca320e2ffc507e9e852a4db5a7d2b1b728490a069872db8117132a4ea6ee0d4d",
+      "expected_initial_parameter_hash": "911a2265770f87c02299bdf501a23b4b6ccaa83225cfafaaf37b8834e8d568c0",
+      "job_id": "optimistic_adam-s22-lr0.001-ca320e2f",
+      "output": "runs/round3/runs/reporting/optimistic_adam-s22-lr0.001-ca320e2f",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/reporting/optimistic_adam-s33-lr0.001-13f1c8f6.json",
+      "config_hash": "13f1c8f6e95311a73fab4a58622ab2410d6c28cb060354a68709db35f0436e4e",
+      "expected_initial_parameter_hash": "0433ee69d27676a0a546057be25c24f1d27f4280686aa61f4f17ccc65e990243",
+      "job_id": "optimistic_adam-s33-lr0.001-13f1c8f6",
+      "output": "runs/round3/runs/reporting/optimistic_adam-s33-lr0.001-13f1c8f6",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/reporting/lookahead_minmax-s11-lr0.001-f70bd9c8.json",
+      "config_hash": "f70bd9c8c9f668b895d6df72d6e6f4c856fa95728a5cd96226f78949f5d5709a",
+      "expected_initial_parameter_hash": "07f96b122fb24dc870b735543061f74af3f497c356a9862c6639248441ad0205",
+      "job_id": "lookahead_minmax-s11-lr0.001-f70bd9c8",
+      "output": "runs/round3/runs/reporting/lookahead_minmax-s11-lr0.001-f70bd9c8",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/reporting/lookahead_minmax-s22-lr0.001-0e996da0.json",
+      "config_hash": "0e996da07aa0d2c06b1ffa859b8d9afe6cfdab4c449fe1cf87a00bb334eb315b",
+      "expected_initial_parameter_hash": "911a2265770f87c02299bdf501a23b4b6ccaa83225cfafaaf37b8834e8d568c0",
+      "job_id": "lookahead_minmax-s22-lr0.001-0e996da0",
+      "output": "runs/round3/runs/reporting/lookahead_minmax-s22-lr0.001-0e996da0",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    },
+    {
+      "config": "runs/round3/configs/reporting/lookahead_minmax-s33-lr0.001-53631545.json",
+      "config_hash": "53631545b185341211efec03b5c8505f4fdb56aca9c203490b5c5217835d35ad",
+      "expected_initial_parameter_hash": "0433ee69d27676a0a546057be25c24f1d27f4280686aa61f4f17ccc65e990243",
+      "job_id": "lookahead_minmax-s33-lr0.001-53631545",
+      "output": "runs/round3/runs/reporting/lookahead_minmax-s33-lr0.001-53631545",
+      "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+    }
+  ],
+  "phase": "reporting",
+  "protocol_code_hashes": {
+    "collect_round3.py": "7cee32fdaff098d36c802aaddacacea515f9dda7064cafeeed15cae3044cea4b",
+    "run_round3.py": "66ed16edba090a63f5e4c274535a4ffd8a88bb421fa07b6f1476c832c7a75a4b"
+  },
+  "schema_version": 1,
+  "source_hash": "ba553c8716d76f768ebbc04eda52285af23c15257777d11f2d8578b92f4759b7"
+}
