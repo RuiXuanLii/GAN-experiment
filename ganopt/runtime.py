@@ -117,10 +117,10 @@ def validate_image_export(config,split,count,seed,calls):
 
 def validate_image_size(config):
     size = config.get('image_size', 32)
-    if type(size) is not int or size not in (32, 64):
-        raise ValueError('image_size must be 32 or 64')
-    if size == 64 and config['dataset'] != 'cifar10':
-        raise ValueError('image_size=64 requires the cifar10 dataset')
+    if type(size) is not int or size not in (32, 64, 128):
+        raise ValueError('image_size must be 32, 64 or 128')
+    if size != 32 and config['dataset'] != 'cifar10':
+        raise ValueError('image_size above 32 requires the cifar10 dataset')
     return size
 
 

@@ -6,7 +6,7 @@ import hashlib
 from pathlib import Path
 from ganopt.optim import METHODS
 from ganopt.runtime import source_hash,METRIC_PROTOCOL,validate_image_size
-from ganopt.data import split_indices,CIFAR10_64_REAL_RESIZE
+from ganopt.data import split_indices,CIFAR10_REAL_RESIZE
 
 COMMON_KEYS=['protocol','dataset','split_seed','batch_size','z_dim','base_channels','betas',
              'eps','gp_lambda','extra_batch','lookahead_k','lookahead_alpha','device','threads']
@@ -29,10 +29,11 @@ def check_metric_evidence(record,config,calls):
         raise ValueError('Metric feature implementation/version mismatch')
     if manifest.get('evaluation_seed')!=123456 or manifest.get('reference_split')!='validation' or manifest.get('count')!=2000 or manifest.get('oracle_calls')!=calls:
         raise ValueError('Metric seed/split/count/endpoint mismatch')
-    if validate_image_size(config) == 64 and (
-        manifest.get('image_size') != 64 or manifest.get('real_resize') != CIFAR10_64_REAL_RESIZE
+    image_size = validate_image_size(config)
+    if image_size > 32 and (
+        manifest.get('image_size') != image_size or manifest.get('real_resize') != CIFAR10_REAL_RESIZE
     ):
-        raise ValueError('64x64 metric evidence has a different image preprocessing protocol')
+        raise ValueError(f'{image_size}x{image_size} metric evidence has a different image preprocessing protocol')
     size,valsize=(50000,5000) if config['dataset']=='cifar10' else (60000,6000)
     _,validation=split_indices(size,config['split_seed'],valsize)
     expected=hashlib.sha256(validation[:2000].astype('<i8').tobytes()).hexdigest()
@@ -45,9 +46,14 @@ def check_metric_evidence(record,config,calls):
     if metrics['frechet_inception_distance']<0: raise ValueError('Negative FID evidence')
 
 
-def freeze(pilot_root,tuning_root,output,gpu_hours,budget=20000):
+def freeze(pilot_root,tuning_root,output,gpu_hours,budget=20000,*,checkpoint_every=None):
     if not math.isfinite(gpu_hours) or gpu_hours<=0: raise ValueError('gpu_hours must be finite and positive')
     if budget<1 or budget%10: raise ValueError('Main budget must be a positive multiple of 10')
+    if checkpoint_every is not None and (
+        type(checkpoint_every) is not int or checkpoint_every < 1
+        or checkpoint_every % 10 or budget % checkpoint_every
+    ):
+        raise ValueError('checkpoint_every must be a positive multiple of 10 that divides the main budget')
     common=None; pilots={}; candidates={m:[] for m in METHODS}; records=[];failed=[]
     for path in Path(pilot_root).rglob('result.json'):
         run=path.parent; c=json.loads((run/'config.json').read_text()); r=json.loads(path.read_text())
@@ -106,10 +112,13 @@ def freeze(pilot_root,tuning_root,output,gpu_hours,budget=20000):
     # Deliberately conservative screening heuristic, not measured main runtime.
     train_hours=1.25*sum(p['seconds_per_call'] for p in pilots.values())*budget*3/3600
     eval_seconds=max(r['evaluation_seconds'] for r in records)
-    eval_hours=1.25*(eval_seconds*2.5*math.ceil(budget/2000)*4*3+eval_seconds*5*4*3)/3600
+    curve_interval = checkpoint_every or 2000
+    eval_hours=1.25*(eval_seconds*2.5*math.ceil(budget/curve_interval)*4*3+eval_seconds*5*4*3)/3600
     if train_hours+eval_hours>gpu_hours:
         raise ValueError(f'Estimated main training+evaluation {train_hours+eval_hours:.2f}h exceeds {gpu_hours}h; reduce all-method budget and justify')
     common.update(oracle_budget=budget)
+    if checkpoint_every is not None:
+        common['checkpoint_every'] = checkpoint_every
     result={'frozen':True,'protocol':'v1.0','source_hash':source_hash(),'common':common,
             'lr_by_algorithm':learning_rates,'reporting_seeds':[11,22,33],
             'metric_protocol':METRIC_PROTOCOL,'failed_tuning_candidates':failed,
@@ -122,7 +131,11 @@ def freeze(pilot_root,tuning_root,output,gpu_hours,budget=20000):
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--pilot',required=True);p.add_argument('--tuning',required=True)
     p.add_argument('--output',default='freeze.json');p.add_argument('--gpu-hours',type=float,required=True)
-    p.add_argument('--budget',type=int,default=20000);a=p.parse_args();print(json.dumps(freeze(a.pilot,a.tuning,a.output,a.gpu_hours,a.budget),indent=2))
+    p.add_argument('--budget',type=int,default=20000)
+    p.add_argument('--checkpoint-every',type=int)
+    a=p.parse_args()
+    print(json.dumps(freeze(a.pilot,a.tuning,a.output,a.gpu_hours,a.budget,
+                            checkpoint_every=a.checkpoint_every),indent=2))
 
 
 if __name__=='__main__': main()

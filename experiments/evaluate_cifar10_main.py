@@ -56,8 +56,8 @@ def make_jobs(root):
     if type(budget) is not int or budget < 1:
         raise ValueError('Frozen oracle_budget must be a positive integer')
     image_size = freeze['common'].get('image_size', 32)
-    if type(image_size) is not int or image_size not in (32, 64):
-        raise ValueError('Frozen image_size must be 32 or 64')
+    if type(image_size) is not int or image_size not in (32, 64, 128):
+        raise ValueError('Frozen image_size must be 32, 64 or 128')
     checkpoint_every = freeze['common'].get('checkpoint_every')
     if checkpoint_every is not None and (type(checkpoint_every) is not int or checkpoint_every < 1):
         raise ValueError('Frozen checkpoint_every must be a positive integer')
@@ -130,8 +130,11 @@ def metric_valid(job):
                         evaluation_seed=123456, metric_protocol=job['metric_protocol'],
                         checkpoint_sha256=digest(job['checkpoint']),
                         real_indices_sha256=job['reference_indices_sha256'])
-        if job['config'].get('image_size', 32) == 64:
-            expected.update(image_size=64, real_resize='pil_bilinear')
+        image_size = job['config'].get('image_size', 32)
+        if image_size > 32:
+            if type(manifest.get('image_size')) is not int:
+                return False
+            expected.update(image_size=image_size, real_resize='pil_bilinear')
         if any(manifest.get(k) != v for k, v in expected.items()):
             return False
         if result.get('status') != 'completed' or result.get('manifest') != manifest:

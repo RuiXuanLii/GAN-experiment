@@ -48,6 +48,8 @@ Windows 的 CIFAR-10 下载及三套实验配置使用 `D:\ESTR3114\project\CIFA
 
 同一数据的 64×64 大模型配置和 AutoDL 启动命令见 [64×64 GAN 实验](docs/cifar10-64-zh.md)。
 
+128×128、batch 8 的配置见 [128×128 GAN 实验](docs/cifar10-128-zh.md)。
+
 ## CIFAR-10 pilot
 
 在可用的 CUDA 环境中准备 CIFAR-10，并在 `configs/cifar10_pilot.json` 设置 `data_root`。需要由 torchvision 下载数据时，将 `download` 设为 `true`。

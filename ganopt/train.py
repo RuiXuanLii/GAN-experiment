@@ -129,7 +129,11 @@ def train(config: dict, output: Path|str, stop_after: int|None=None, resume: boo
         eval_rng=torch.Generator(device='cpu').manual_seed(123456)
         noise=torch.randn(config['eval_samples'],config['z_dim'],generator=eval_rng).to(device)
         G.eval()
-        with torch.no_grad(): samples=G(noise).cpu()
+        with torch.no_grad():
+            if config.get('image_size', 32) == 128:
+                samples = torch.cat([G(batch).cpu() for batch in noise.split(config['batch_size'])])
+            else:
+                samples = G(noise).cpu()
         G.train()
         import numpy as np
         np.save(output/'samples.npy',samples.numpy())

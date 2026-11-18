@@ -10,7 +10,7 @@ import time
 import math
 import torch
 from PIL import Image
-from ganopt.data import CIFAR10_64_REAL_RESIZE
+from ganopt.data import CIFAR10_REAL_RESIZE
 from ganopt.runtime import source_hash,validate_image_export,METRIC_PROTOCOL
 
 
@@ -23,14 +23,14 @@ def evaluate(folder,cuda=False):
     declared_size = manifest.get('image_size', 32)
     if type(declared_size) is not int or declared_size != image_size:
         raise ValueError('Export image_size disagrees with configuration')
-    if image_size == 64 and (manifest.get('dataset') != 'cifar10' or
-                             manifest.get('real_resize') != CIFAR10_64_REAL_RESIZE):
-        raise ValueError('64×64 CIFAR-10 exports require the declared PIL bilinear real-image resize')
+    if image_size > 32 and (manifest.get('dataset') != 'cifar10' or
+                            manifest.get('real_resize') != CIFAR10_REAL_RESIZE):
+        raise ValueError(f'{image_size}×{image_size} CIFAR-10 exports require the declared PIL bilinear real-image resize')
     for sub in ['real','fake']:
         images = list((folder/sub).glob('*.png'))
         if len(images)!=manifest['count']:
             raise ValueError('Image count disagrees with manifest')
-        if image_size == 64:
+        if image_size > 32:
             for path in images:
                 try:
                     with Image.open(path, formats=['PNG']) as image:

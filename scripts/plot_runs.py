@@ -38,8 +38,9 @@ def main():
             import torch
             grid=make_grid(torch.from_numpy(samples[:16]),nrow=4,normalize=True,value_range=(-1,1))
             ax.imshow(grid.permute(1,2,0).numpy()); ax.axis('off')
-        if c['dataset']=='cifar10' and c.get('image_size',32)==64:
-            title=f"{c['algorithm']} · 64×64 · width {c['base_channels']} · seed {c['seed']}"
+        image_size=c.get('image_size',32)
+        if c['dataset']=='cifar10' and image_size>32:
+            title=f"{c['algorithm']} · {image_size}×{image_size} · width {c['base_channels']} · seed {c['seed']}"
         else:
             title=c['algorithm']
         ax.set_title(title,fontsize=10)

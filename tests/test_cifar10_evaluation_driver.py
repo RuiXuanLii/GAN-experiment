@@ -83,8 +83,8 @@ class EvaluationDriverTests(unittest.TestCase):
                     'evaluation_seed': 123456, 'metric_protocol': job['metric_protocol'],
                     'real_indices_sha256': job['reference_indices_sha256'],
                     'checkpoint_sha256': hashlib.sha256(Path(job['checkpoint']).read_bytes()).hexdigest()}
-        if image_size == 64:
-            manifest.update(image_size=64, real_resize='pil_bilinear')
+        if image_size > 32:
+            manifest.update(image_size=image_size, real_resize='pil_bilinear')
         result = {'status': 'completed', 'manifest': manifest, 'evaluation_seconds': 10.,
                   'source_hash': job['source_hash'], 'metric_protocol': job['metric_protocol'],
                   'torch_fidelity_version': '0.3.0', 'feature_extractor': 'inception-v3-compat',
@@ -108,14 +108,23 @@ class EvaluationDriverTests(unittest.TestCase):
         self.assertTrue(all(j['calls'] == 20000 and j['count'] == 10000 for j in tests))
         self.assertEqual(len({j['folder'] for j in jobs}), 132)
 
-    def test_64_suite_uses_frozen_budget_and_shared_checkpoint_interval(self):
-        self.configure_suite(budget=6000, checkpoint_every=3000, image_size=64,
-                             freeze_interval=True)
-        jobs = driver.make_jobs(self.root)
-        self.assertEqual(len(jobs), 36)
-        self.assertEqual({j['calls'] for j in jobs if j['split'] == 'validation'}, {3000, 6000})
-        self.assertEqual(sum(j['split'] == 'test' and j['calls'] == 6000 for j in jobs), 12)
-        self.assertTrue(all(j['config']['image_size'] == 64 for j in jobs))
+    def test_resized_suites_use_frozen_budget_and_checkpoint_interval(self):
+        for image_size, budget, interval, expected_calls in [
+            (64, 6000, 3000, {3000, 6000}),
+            (128, 20000, 5000, {5000, 10000, 15000, 20000}),
+        ]:
+            with self.subTest(image_size=image_size):
+                self.configure_suite(budget=budget, checkpoint_every=interval, image_size=image_size,
+                                     freeze_interval=True)
+                jobs = driver.make_jobs(self.root)
+                validation = [job for job in jobs if job['split'] == 'validation']
+                tests = [job for job in jobs if job['split'] == 'test']
+                self.assertEqual(len(validation), 12 * len(expected_calls))
+                self.assertEqual({job['calls'] for job in validation}, expected_calls)
+                self.assertTrue(all(job['count'] == 5000 for job in validation))
+                self.assertEqual(len(tests), 12)
+                self.assertTrue(all(job['calls'] == budget and job['count'] == 10000 for job in tests))
+                self.assertTrue(all(job['config']['image_size'] == image_size for job in jobs))
 
     def test_legacy_freeze_without_interval_uses_consistent_run_interval(self):
         self.configure_suite(budget=6000, checkpoint_every=3000)
@@ -135,31 +144,43 @@ class EvaluationDriverTests(unittest.TestCase):
                     driver.make_jobs(self.root)
 
     def test_64_cache_binds_resolution_and_reference_resize(self):
-        job, manifest, result = self.completed_job(image_size=64)
-        self.assertTrue(driver.metric_valid(job))
-        for key, wrong in [('image_size', 32), ('real_resize', 'pil_nearest')]:
-            with self.subTest(key=key):
-                correct = manifest.pop(key)
-                self.write(Path(job['folder']) / 'manifest.json', manifest)
-                self.write(Path(job['folder']) / 'metrics.json', result)
-                self.assertFalse(driver.metric_valid(job))
-                manifest[key] = wrong
-                self.write(Path(job['folder']) / 'manifest.json', manifest)
-                self.write(Path(job['folder']) / 'metrics.json', result)
-                self.assertFalse(driver.metric_valid(job))
-                manifest[key] = correct
+        self.assert_cache_binds_resolution_and_reference_resize(image_size=64, wrong_size=32)
 
-    def test_64_disk_preflight_accounts_for_four_png_blocks(self):
-        self.configure_suite(image_size=64)
-        pending = driver.make_jobs(self.root)[:1]
-        free = 1024**3 + 10000 * 8192
+    def test_128_cache_binds_resolution_and_reference_resize(self):
+        self.assert_cache_binds_resolution_and_reference_resize(image_size=128, wrong_size=64)
+
+    def assert_cache_binds_resolution_and_reference_resize(self, image_size, wrong_size):
+        job, manifest, result = self.completed_job(image_size=image_size)
+        self.assertTrue(driver.metric_valid(job))
+        folder = Path(job['folder'])
+        for key, wrong_values in [('image_size', (wrong_size, float(image_size))),
+                                  ('real_resize', ('pil_nearest',))]:
+            correct = manifest.pop(key)
+            with self.subTest(key=key, value='missing'):
+                self.write(folder / 'manifest.json', manifest)
+                self.write(folder / 'metrics.json', result)
+                self.assertFalse(driver.metric_valid(job))
+            for wrong in wrong_values:
+                with self.subTest(key=key, value=wrong):
+                    manifest[key] = wrong
+                    self.write(folder / 'manifest.json', manifest)
+                    self.write(folder / 'metrics.json', result)
+                    self.assertFalse(driver.metric_valid(job))
+            manifest[key] = correct
+
+    def test_disk_preflight_accounts_for_resized_png_blocks(self):
         filesystem = SimpleNamespace(f_frsize=4096, f_files=10000000, f_favail=10000000)
-        with patch.object(driver.shutil, 'disk_usage', return_value=SimpleNamespace(free=free)), \
-             patch.object(driver.os, 'statvfs', return_value=filesystem), \
-             patch.object(driver.subprocess, 'check_output',
-                          side_effect=AssertionError('Undersized disk passed preflight')):
-            with self.assertRaisesRegex(RuntimeError, 'Insufficient free disk'):
-                driver.preflight(self.root, pending)
+        for image_size, blocks_per_image in [(64, 4), (128, 13)]:
+            with self.subTest(image_size=image_size):
+                self.configure_suite(image_size=image_size)
+                pending = driver.make_jobs(self.root)[:1]
+                free = 1024**3 + 2 * pending[0]['count'] * blocks_per_image * filesystem.f_frsize - 1
+                with patch.object(driver.shutil, 'disk_usage', return_value=SimpleNamespace(free=free)), \
+                     patch.object(driver.os, 'statvfs', return_value=filesystem), \
+                     patch.object(driver.subprocess, 'check_output',
+                                  side_effect=AssertionError('Undersized disk passed preflight')):
+                    with self.assertRaisesRegex(RuntimeError, 'Insufficient free disk'):
+                        driver.preflight(self.root, pending)
 
     def test_benchmark_memory_estimate_is_bound_to_resolution(self):
         self.assertTrue(hasattr(driver, 'worker_memory_estimate'))

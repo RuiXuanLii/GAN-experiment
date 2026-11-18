@@ -1,12 +1,13 @@
 """Export real references and generated uint8 PNGs from a trusted image checkpoint."""
 import argparse
+from functools import partial
 import hashlib
 import json
 from pathlib import Path
 import numpy as np
 from PIL import Image
 import torch
-from ganopt.data import CIFAR10_64_REAL_RESIZE, resize_cifar10_to_64, split_indices
+from ganopt.data import CIFAR10_REAL_RESIZE, resize_cifar10, split_indices
 from ganopt.models import make_models
 from ganopt.runtime import source_hash,validate_image_export,METRIC_PROTOCOL
 
@@ -37,28 +38,34 @@ def export(checkpoint,output,data_root,split='validation',count=2000,seed=123456
     if count>len(indices): raise ValueError('Requested more real images than reference split contains')
     indices=indices[:count]
     G,_=make_models(c); G.load_state_dict(state['generator']); G.to(device).eval()
-    if image_size == 64:
-        transform = resize_cifar10_to_64
+    if image_size > 32:
+        transform = partial(resize_cifar10, image_size=image_size)
     elif c['dataset']=='mnist': transform=transforms.Compose([transforms.Resize((32,32)),transforms.Grayscale(3)])
     else: transform=lambda x:x
     for folder in ['real','fake']: (output/folder).mkdir(parents=True,exist_ok=True)
     for i,index in enumerate(indices): transform(real_data[int(index)][0]).save(output/'real'/f'{i:06d}.png')
     rng=torch.Generator(device='cpu').manual_seed(seed)
+    noise_batch_size = 64
+    batch_size = min(noise_batch_size, c['batch_size']) if image_size == 128 else noise_batch_size
     with torch.no_grad():
-        for start in range(0,count,64):
-            z=torch.randn(min(64,count-start),c['z_dim'],generator=rng).to(device)
-            samples = G(z)
-            expected_shape = (z.shape[0], 3, image_size, image_size)
-            if samples.shape != expected_shape:
-                raise ValueError(f'Expected generated NCHW RGB shape {expected_shape}, got {tuple(samples.shape)}')
-            for j,array in enumerate(to_uint8(samples)): Image.fromarray(array).save(output/'fake'/f'{start+j:06d}.png')
+        for start in range(0, count, noise_batch_size):
+            # Keep the fixed latent draws independent of the generator forward batch size.
+            noise = torch.randn(min(noise_batch_size, count - start), c['z_dim'], generator=rng)
+            for offset in range(0, len(noise), batch_size):
+                z = noise[offset:offset + batch_size].to(device)
+                samples = G(z)
+                expected_shape = (z.shape[0], 3, image_size, image_size)
+                if samples.shape != expected_shape:
+                    raise ValueError(f'Expected generated NCHW RGB shape {expected_shape}, got {tuple(samples.shape)}')
+                for j, array in enumerate(to_uint8(samples)):
+                    Image.fromarray(array).save(output / 'fake' / f'{start + offset + j:06d}.png')
     manifest={'dataset':c['dataset'],'reference_split':split,'count':count,'evaluation_seed':seed,
               'checkpoint_sha256':hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
               'source_hash':state['source_hash'],'config':c,'oracle_calls':state['oracle_calls'],
               'metric_protocol':METRIC_PROTOCOL,
               'real_indices_sha256':hashlib.sha256(indices.astype('<i8').tobytes()).hexdigest()}
-    if image_size == 64:
-        manifest.update(image_size=image_size, real_resize=CIFAR10_64_REAL_RESIZE)
+    if image_size > 32:
+        manifest.update(image_size=image_size, real_resize=CIFAR10_REAL_RESIZE)
     (output/'manifest.json').write_text(json.dumps(manifest,indent=2)); return output
 
 
