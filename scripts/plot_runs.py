@@ -38,7 +38,11 @@ def main():
             import torch
             grid=make_grid(torch.from_numpy(samples[:16]),nrow=4,normalize=True,value_range=(-1,1))
             ax.imshow(grid.permute(1,2,0).numpy()); ax.axis('off')
-        ax.set_title(c['algorithm'],fontsize=10)
+        if c['dataset']=='cifar10' and c.get('image_size',32)==64:
+            title=f"{c['algorithm']} · 64×64 · width {c['base_channels']} · seed {c['seed']}"
+        else:
+            title=c['algorithm']
+        ax.set_title(title,fontsize=10)
     fig.suptitle('Short-run generated samples; diagnostic evidence only')
     fig.savefig(out/'generated_samples.png',dpi=160); plt.close(fig)
     print(out)

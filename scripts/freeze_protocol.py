@@ -5,11 +5,15 @@ import math
 import hashlib
 from pathlib import Path
 from ganopt.optim import METHODS
-from ganopt.runtime import source_hash,METRIC_PROTOCOL
-from ganopt.data import split_indices
+from ganopt.runtime import source_hash,METRIC_PROTOCOL,validate_image_size
+from ganopt.data import split_indices,CIFAR10_64_REAL_RESIZE
 
 COMMON_KEYS=['protocol','dataset','split_seed','batch_size','z_dim','base_channels','betas',
              'eps','gp_lambda','extra_batch','lookahead_k','lookahead_alpha','device','threads']
+
+
+def common_settings(config):
+    return dict({key: config[key] for key in COMMON_KEYS}, image_size=validate_image_size(config))
 
 
 def check_metric_evidence(record,config,calls):
@@ -25,6 +29,10 @@ def check_metric_evidence(record,config,calls):
         raise ValueError('Metric feature implementation/version mismatch')
     if manifest.get('evaluation_seed')!=123456 or manifest.get('reference_split')!='validation' or manifest.get('count')!=2000 or manifest.get('oracle_calls')!=calls:
         raise ValueError('Metric seed/split/count/endpoint mismatch')
+    if validate_image_size(config) == 64 and (
+        manifest.get('image_size') != 64 or manifest.get('real_resize') != CIFAR10_64_REAL_RESIZE
+    ):
+        raise ValueError('64x64 metric evidence has a different image preprocessing protocol')
     size,valsize=(50000,5000) if config['dataset']=='cifar10' else (60000,6000)
     _,validation=split_indices(size,config['split_seed'],valsize)
     expected=hashlib.sha256(validation[:2000].astype('<i8').tobytes()).hexdigest()
@@ -51,7 +59,7 @@ def freeze(pilot_root,tuning_root,output,gpu_hours,budget=20000):
             raise ValueError('Pilot must use shared image data, seed9001, default LR and 200 calls')
         if not math.isfinite(r['training_seconds']) or r['training_seconds']<=0:
             raise ValueError('Invalid pilot timing')
-        current={k:c[k] for k in COMMON_KEYS}
+        current=common_settings(c)
         if common is not None and current!=common: raise ValueError('Pilot shared configurations differ')
         common=current
         rows=[json.loads(l) for l in (run/'metrics.jsonl').read_text().splitlines()]
@@ -71,7 +79,7 @@ def freeze(pilot_root,tuning_root,output,gpu_hours,budget=20000):
         run=result_path.parent;c=json.loads((run/'config.json').read_text());result=json.loads(result_path.read_text())
         if c['stage']!='tuning': continue
         meta=json.loads((run/'metadata.json').read_text())
-        if meta['source_hash']!=source_hash() or {k:c[k] for k in COMMON_KEYS}!=common:
+        if meta['source_hash']!=source_hash() or common_settings(c)!=common:
             raise ValueError('Tuning source/common configuration mismatch')
         if c['seed']!=9001 or c['oracle_budget']!=2000 or c['lr'] not in [5e-5,1e-4,2e-4]:
             raise ValueError('Tuning seed/rate/budget mismatch')

@@ -79,7 +79,10 @@ def validate_frozen_config(config):
     if not freeze.get('frozen') or freeze['source_hash']!=source_hash():
         raise ValueError('Protocol freeze/source mismatch')
     for key,value in freeze['common'].items():
-        if config.get(key)!=value: raise ValueError(f'Frozen configuration mismatch: {key}')
+        current = config.get(key, 32) if key == 'image_size' else config.get(key)
+        if current!=value: raise ValueError(f'Frozen configuration mismatch: {key}')
+    if config.get('image_size', 32) != freeze['common'].get('image_size', 32):
+        raise ValueError('Frozen configuration mismatch: image_size')
     if config['lr']!=freeze['lr_by_algorithm'][config['algorithm']]:
         raise ValueError('Frozen learning rate mismatch')
     if config['seed'] not in freeze['reporting_seeds']: raise ValueError('Frozen reporting seed mismatch')
@@ -93,6 +96,7 @@ METRIC_PROTOCOL={'torch_fidelity_version':'0.3.0','feature_extractor':'inception
 def validate_image_export(config,split,count,seed,calls):
     """Prevent test-data access before the fixed, frozen primary endpoint."""
     if seed!=METRIC_PROTOCOL['evaluation_seed']: raise ValueError('Fixed evaluation seed required')
+    validate_image_size(config)
     stage=config['stage']
     if split=='test':
         if stage!='main': raise ValueError('Test set reserved for frozen main experiments')
@@ -111,9 +115,19 @@ def validate_image_export(config,split,count,seed,calls):
         raise ValueError('Frozen metric protocol mismatch')
 
 
+def validate_image_size(config):
+    size = config.get('image_size', 32)
+    if type(size) is not int or size not in (32, 64):
+        raise ValueError('image_size must be 32 or 64')
+    if size == 64 and config['dataset'] != 'cifar10':
+        raise ValueError('image_size=64 requires the cifar10 dataset')
+    return size
+
+
 def validate(config):
     if config['algorithm'] not in METHODS: raise ValueError('Unknown algorithm')
     if config['dataset'] not in ['synthetic','cifar10','mnist']: raise ValueError('Unknown dataset')
+    validate_image_size(config)
     if config.get('extra_batch','independent') not in ['independent','same']:
         raise ValueError('Unknown extra_batch setting')
     cost=METHODS[config['algorithm']].oracle_cost

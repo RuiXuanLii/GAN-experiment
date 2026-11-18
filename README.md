@@ -46,6 +46,8 @@ python -m scripts.plot_runs --runs runs/round1/extended --output runs/gaussian_e
 
 Windows 的 CIFAR-10 下载及三套实验配置使用 `D:\ESTR3114\project\CIFAR-10\dataset`，操作见 [本机准备说明](docs/cifar10-windows-zh.md)。
 
+同一数据的 64×64 大模型配置和 AutoDL 启动命令见 [64×64 GAN 实验](docs/cifar10-64-zh.md)。
+
 ## CIFAR-10 pilot
 
 在可用的 CUDA 环境中准备 CIFAR-10，并在 `configs/cifar10_pilot.json` 设置 `data_root`。需要由 torchvision 下载数据时，将 `download` 设为 `true`。

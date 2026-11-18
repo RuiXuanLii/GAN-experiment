@@ -52,6 +52,15 @@ def make_jobs(root):
         raise ValueError('Protocol is not frozen')
     if sorted(freeze['reporting_seeds']) != [11, 22, 33]:
         raise ValueError('Expected reporting seeds 11, 22, 33 exactly once')
+    budget = freeze['common']['oracle_budget']
+    if type(budget) is not int or budget < 1:
+        raise ValueError('Frozen oracle_budget must be a positive integer')
+    image_size = freeze['common'].get('image_size', 32)
+    if type(image_size) is not int or image_size not in (32, 64):
+        raise ValueError('Frozen image_size must be 32 or 64')
+    checkpoint_every = freeze['common'].get('checkpoint_every')
+    if checkpoint_every is not None and (type(checkpoint_every) is not int or checkpoint_every < 1):
+        raise ValueError('Frozen checkpoint_every must be a positive integer')
     expected = {(m, s) for m in METHODS for s in freeze['reporting_seeds']}
     found = {}
     for folder in sorted(root.glob('main-cifar10-*')):
@@ -63,8 +72,18 @@ def make_jobs(root):
             raise ValueError(f'Unexpected or duplicate formal run: {folder}')
         if config.get('stage') != 'main' or config.get('dataset') != 'cifar10':
             raise ValueError(f'Not a main CIFAR-10 run: {folder}')
-        if any(config.get(k) != v for k, v in freeze['common'].items()):
+        if any((config.get(k, 32) if k == 'image_size' else config.get(k)) != v
+               for k, v in freeze['common'].items()):
             raise ValueError(f'Frozen configuration mismatch: {folder}')
+        if config.get('image_size', 32) != image_size:
+            raise ValueError(f'Frozen image_size mismatch: {folder}')
+        interval = config.get('checkpoint_every')
+        if type(interval) is not int or interval < 1:
+            raise ValueError(f'checkpoint_every must be a positive integer: {folder}')
+        if checkpoint_every is None:
+            checkpoint_every = interval
+        elif interval != checkpoint_every:
+            raise ValueError(f'Inconsistent checkpoint_every: {folder}')
         if config['lr'] != freeze['lr_by_algorithm'][key[0]]:
             raise ValueError(f'Frozen learning rate mismatch: {folder}')
         if read_json(folder / 'metadata.json')['source_hash'] != freeze['source_hash']:
@@ -77,14 +96,13 @@ def make_jobs(root):
         found[key] = folder, config
     if set(found) != expected:
         raise ValueError(f'Missing formal runs: {expected - set(found)}')
+    if budget % checkpoint_every:
+        raise ValueError('Frozen oracle_budget must be divisible by checkpoint_every')
     jobs = []
     for seed in freeze['reporting_seeds']:
         for method in METHODS:
             folder, config = found[method, seed]
-            budget = config['oracle_budget']
-            if budget != 20000 or config['checkpoint_every'] != 2000:
-                raise ValueError('This driver requires the frozen 20,000-call/2,000-interval suite')
-            points = [('validation', n, 5000) for n in range(2000, budget + 1, 2000)]
+            points = [('validation', n, 5000) for n in range(checkpoint_every, budget + 1, checkpoint_every)]
             points += [('test', budget, 10000)]
             for split, calls, count in points:
                 checkpoint = folder / 'checkpoints' / f'calls_{calls:08d}.pt' if split == 'validation' else folder / 'checkpoint.pt'
@@ -94,8 +112,9 @@ def make_jobs(root):
                 jobs.append(dict(checkpoint=str(checkpoint), folder=str(output), config=config,
                                  method=method, seed=seed, calls=calls, split=split, count=count,
                                  source_hash=freeze['source_hash'], metric_protocol=freeze['metric_protocol']))
-    if len(jobs) != 132:
-        raise ValueError('Expected exactly 132 formal evaluation points')
+    expected_count = len(expected) * (budget // checkpoint_every + 1)
+    if len(jobs) != expected_count:
+        raise ValueError(f'Expected exactly {expected_count} formal evaluation points')
     return jobs
 
 
@@ -111,6 +130,8 @@ def metric_valid(job):
                         evaluation_seed=123456, metric_protocol=job['metric_protocol'],
                         checkpoint_sha256=digest(job['checkpoint']),
                         real_indices_sha256=job['reference_indices_sha256'])
+        if job['config'].get('image_size', 32) == 64:
+            expected.update(image_size=64, real_resize='pil_bilinear')
         if any(manifest.get(k) != v for k, v in expected.items()):
             return False
         if result.get('status') != 'completed' or result.get('manifest') != manifest:
@@ -173,13 +194,36 @@ def memory_headroom(host_available, limit, used):
     return max(0, min(host_available, limit - used))
 
 
+def worker_memory_estimate(benchmark, gpu, image_size):
+    sizes = []
+    records = [benchmark]
+    if isinstance(benchmark.get('manifest'), dict):
+        records.append(benchmark['manifest'])
+    for record in records:
+        if 'image_size' in record:
+            sizes.append(record['image_size'])
+        if isinstance(record.get('config'), dict):
+            sizes.append(record['config'].get('image_size', 32))
+    sizes = sizes or [32]
+    if (benchmark.get('gpu') == gpu and benchmark.get('torch_peak_reserved_GiB') is not None
+            and all(type(size) is int and size == image_size for size in sizes)):
+        return max(2048., (float(benchmark['torch_peak_reserved_GiB']) + .75) * 1024)
+    return 6144.
+
+
 def preflight(root, pending, requested_workers=None):
     if not pending:
         return dict(maximum_workers=0, threads=1, already_complete=True)
     disk = shutil.disk_usage(root)
     required_files = sum(2 * j['count'] for j in pending)
     fs = os.statvfs(root)
-    required_bytes = required_files * max(4096, fs.f_frsize) + 1024**3
+    block_bytes = max(4096, fs.f_frsize)
+    required_bytes = 1024**3
+    for job in pending:
+        size = job['config'].get('image_size', 32)
+        png_bytes = 3 * size**2 + 2 * size + 256
+        allocated_bytes = ((png_bytes + block_bytes - 1) // block_bytes) * block_bytes
+        required_bytes += 2 * job['count'] * allocated_bytes
     if disk.free < required_bytes or (fs.f_files and fs.f_favail < required_files + 10000):
         raise RuntimeError(f'Insufficient free disk/inodes for retained PNGs: need about {required_bytes/1024**3:.1f} GiB and {required_files} files')
     info = subprocess.check_output(['nvidia-smi', '--query-gpu=name,memory.free,memory.total',
@@ -189,9 +233,11 @@ def preflight(root, pending, requested_workers=None):
     gpu, free_mb, total_mb = [s.strip() for s in info[0].split(',')]
     benchmark_file = root / 'evaluation-benchmark.json'
     benchmark = read_json(benchmark_file) if benchmark_file.exists() else {}
-    per_worker_mb = 6144.
-    if benchmark.get('gpu') == gpu and benchmark.get('torch_peak_reserved_GiB') is not None:
-        per_worker_mb = max(2048., (float(benchmark['torch_peak_reserved_GiB']) + .75) * 1024)
+    image_sizes = {j['config'].get('image_size', 32) for j in pending}
+    if len(image_sizes) != 1:
+        raise ValueError('Evaluation workers require one frozen image_size')
+    image_size = next(iter(image_sizes))
+    per_worker_mb = worker_memory_estimate(benchmark, gpu, image_size)
     # torch-fidelity 0.3.0 starts four data-loader processes per GPU job.
     usable_mb = max(0., float(free_mb) - .10 * float(total_mb))
     capacity = requested_workers if requested_workers is not None else min(4, max(1, cpu_budget() // 5))
@@ -214,7 +260,8 @@ def preflight(root, pending, requested_workers=None):
                 maximum_workers=maximum, loader_workers_per_process=4,
                 host_available_GiB=available_bytes/1024**3,
                 requested_workers=requested_workers, gpu_budget_fraction=.90,
-                estimated_per_worker_MiB=per_worker_mb,
+                estimated_per_worker_MiB=per_worker_mb, image_size=image_size,
+                required_disk_GiB=required_bytes/1024**3,
                 free_disk_GiB=disk.free/1024**3, free_inodes=fs.f_favail)
 
 
@@ -258,7 +305,7 @@ def evaluate_point(job, threads):
     torch.cuda.synchronize()
     write_json(folder / 'execution.json', dict(export_seconds=exported-started,
                evaluation_seconds=time.perf_counter()-exported, total_seconds=time.perf_counter()-started,
-               gpu=torch.cuda.get_device_name(0), threads=threads,
+               gpu=torch.cuda.get_device_name(0), threads=threads, image_size=job['config'].get('image_size', 32),
                torch_peak_reserved_GiB=torch.cuda.max_memory_reserved()/1024**3))
     if not metric_valid(job):
         raise ValueError('New evaluation failed provenance/count/metric verification')
@@ -366,7 +413,7 @@ def run_suite(root, project, requested_workers=None):
         writer.writeheader()
         writer.writerows(rows)
     (root / 'EVALUATION_COMPLETED').touch()
-    print(f'ALL_EVALUATIONS_COMPLETED: {len(rows)}/132', flush=True)
+    print(f'ALL_EVALUATIONS_COMPLETED: {len(rows)}/{len(jobs)}', flush=True)
 
 
 def main():

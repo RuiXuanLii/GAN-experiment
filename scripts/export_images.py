@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 import torch
-from ganopt.data import split_indices
+from ganopt.data import CIFAR10_64_REAL_RESIZE, resize_cifar10_to_64, split_indices
 from ganopt.models import make_models
 from ganopt.runtime import source_hash,validate_image_export,METRIC_PROTOCOL
 
@@ -25,6 +25,7 @@ def export(checkpoint,output,data_root,split='validation',count=2000,seed=123456
     if state['source_hash']!=source_hash(): raise ValueError('Checkpoint source mismatch')
     if split not in ['validation','test']: raise ValueError('Unknown reference split')
     validate_image_export(c,split,count,seed,state['oracle_calls'])
+    image_size = c.get('image_size', 32)
     if count<1000: raise ValueError('Image metric sample count must be >=1000')
     if output.exists() and any(output.iterdir()): raise FileExistsError('Export directory already exists')
     from torchvision import datasets,transforms
@@ -36,7 +37,9 @@ def export(checkpoint,output,data_root,split='validation',count=2000,seed=123456
     if count>len(indices): raise ValueError('Requested more real images than reference split contains')
     indices=indices[:count]
     G,_=make_models(c); G.load_state_dict(state['generator']); G.to(device).eval()
-    if c['dataset']=='mnist': transform=transforms.Compose([transforms.Resize((32,32)),transforms.Grayscale(3)])
+    if image_size == 64:
+        transform = resize_cifar10_to_64
+    elif c['dataset']=='mnist': transform=transforms.Compose([transforms.Resize((32,32)),transforms.Grayscale(3)])
     else: transform=lambda x:x
     for folder in ['real','fake']: (output/folder).mkdir(parents=True,exist_ok=True)
     for i,index in enumerate(indices): transform(real_data[int(index)][0]).save(output/'real'/f'{i:06d}.png')
@@ -44,12 +47,18 @@ def export(checkpoint,output,data_root,split='validation',count=2000,seed=123456
     with torch.no_grad():
         for start in range(0,count,64):
             z=torch.randn(min(64,count-start),c['z_dim'],generator=rng).to(device)
-            for j,array in enumerate(to_uint8(G(z))): Image.fromarray(array).save(output/'fake'/f'{start+j:06d}.png')
+            samples = G(z)
+            expected_shape = (z.shape[0], 3, image_size, image_size)
+            if samples.shape != expected_shape:
+                raise ValueError(f'Expected generated NCHW RGB shape {expected_shape}, got {tuple(samples.shape)}')
+            for j,array in enumerate(to_uint8(samples)): Image.fromarray(array).save(output/'fake'/f'{start+j:06d}.png')
     manifest={'dataset':c['dataset'],'reference_split':split,'count':count,'evaluation_seed':seed,
               'checkpoint_sha256':hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
               'source_hash':state['source_hash'],'config':c,'oracle_calls':state['oracle_calls'],
               'metric_protocol':METRIC_PROTOCOL,
               'real_indices_sha256':hashlib.sha256(indices.astype('<i8').tobytes()).hexdigest()}
+    if image_size == 64:
+        manifest.update(image_size=image_size, real_resize=CIFAR10_64_REAL_RESIZE)
     (output/'manifest.json').write_text(json.dumps(manifest,indent=2)); return output
 
 

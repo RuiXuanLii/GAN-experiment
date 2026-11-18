@@ -4,7 +4,9 @@ import json
 from pathlib import Path
 import shutil
 import tempfile
+from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 DRIVER = Path(__file__).resolve().parents[1] / 'experiments/evaluate_cifar10_main.py'
 if DRIVER.exists():
@@ -51,7 +53,27 @@ class EvaluationDriverTests(unittest.TestCase):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(obj))
 
-    def completed_job(self):
+    def configure_suite(self, *, budget=20000, checkpoint_every=2000, image_size=32,
+                        freeze_interval=False):
+        self.freeze['common']['oracle_budget'] = budget
+        if image_size != 32:
+            self.freeze['common']['image_size'] = image_size
+        if freeze_interval:
+            self.freeze['common']['checkpoint_every'] = checkpoint_every
+        self.write(self.root / 'freeze.json', self.freeze)
+        for folder in self.root.glob('main-cifar10-*'):
+            config = json.loads((folder / 'config.json').read_text())
+            config.update(oracle_budget=budget, checkpoint_every=checkpoint_every)
+            if image_size != 32:
+                config['image_size'] = image_size
+            self.write(folder / 'config.json', config)
+            self.write(folder / 'result.json', {'status': 'completed', 'oracle_calls': budget})
+            for calls in range(checkpoint_every, budget + 1, checkpoint_every):
+                (folder / 'checkpoints' / f'calls_{calls:08d}.pt').write_bytes(str(calls).encode())
+
+    def completed_job(self, image_size=32):
+        if image_size != 32:
+            self.configure_suite(image_size=image_size)
         job = driver.make_jobs(self.root)[0]
         job['reference_indices_sha256'] = 'a' * 64
         folder = Path(job['folder'])
@@ -61,6 +83,8 @@ class EvaluationDriverTests(unittest.TestCase):
                     'evaluation_seed': 123456, 'metric_protocol': job['metric_protocol'],
                     'real_indices_sha256': job['reference_indices_sha256'],
                     'checkpoint_sha256': hashlib.sha256(Path(job['checkpoint']).read_bytes()).hexdigest()}
+        if image_size == 64:
+            manifest.update(image_size=64, real_resize='pil_bilinear')
         result = {'status': 'completed', 'manifest': manifest, 'evaluation_seconds': 10.,
                   'source_hash': job['source_hash'], 'metric_protocol': job['metric_protocol'],
                   'torch_fidelity_version': '0.3.0', 'feature_extractor': 'inception-v3-compat',
@@ -83,6 +107,70 @@ class EvaluationDriverTests(unittest.TestCase):
         self.assertEqual(len(tests), 12)
         self.assertTrue(all(j['calls'] == 20000 and j['count'] == 10000 for j in tests))
         self.assertEqual(len({j['folder'] for j in jobs}), 132)
+
+    def test_64_suite_uses_frozen_budget_and_shared_checkpoint_interval(self):
+        self.configure_suite(budget=6000, checkpoint_every=3000, image_size=64,
+                             freeze_interval=True)
+        jobs = driver.make_jobs(self.root)
+        self.assertEqual(len(jobs), 36)
+        self.assertEqual({j['calls'] for j in jobs if j['split'] == 'validation'}, {3000, 6000})
+        self.assertEqual(sum(j['split'] == 'test' and j['calls'] == 6000 for j in jobs), 12)
+        self.assertTrue(all(j['config']['image_size'] == 64 for j in jobs))
+
+    def test_legacy_freeze_without_interval_uses_consistent_run_interval(self):
+        self.configure_suite(budget=6000, checkpoint_every=3000)
+        self.assertEqual(len(driver.make_jobs(self.root)), 36)
+        path = next(self.root.glob('main-cifar10-*/config.json'))
+        config = json.loads(path.read_text())
+        config['checkpoint_every'] = 2000
+        self.write(path, config)
+        with self.assertRaises(ValueError):
+            driver.make_jobs(self.root)
+
+    def test_budget_must_be_positive_and_divisible_by_interval(self):
+        for budget in (0, 5000):
+            with self.subTest(budget=budget):
+                self.configure_suite(budget=budget, checkpoint_every=2000)
+                with self.assertRaises(ValueError):
+                    driver.make_jobs(self.root)
+
+    def test_64_cache_binds_resolution_and_reference_resize(self):
+        job, manifest, result = self.completed_job(image_size=64)
+        self.assertTrue(driver.metric_valid(job))
+        for key, wrong in [('image_size', 32), ('real_resize', 'pil_nearest')]:
+            with self.subTest(key=key):
+                correct = manifest.pop(key)
+                self.write(Path(job['folder']) / 'manifest.json', manifest)
+                self.write(Path(job['folder']) / 'metrics.json', result)
+                self.assertFalse(driver.metric_valid(job))
+                manifest[key] = wrong
+                self.write(Path(job['folder']) / 'manifest.json', manifest)
+                self.write(Path(job['folder']) / 'metrics.json', result)
+                self.assertFalse(driver.metric_valid(job))
+                manifest[key] = correct
+
+    def test_64_disk_preflight_accounts_for_four_png_blocks(self):
+        self.configure_suite(image_size=64)
+        pending = driver.make_jobs(self.root)[:1]
+        free = 1024**3 + 10000 * 8192
+        filesystem = SimpleNamespace(f_frsize=4096, f_files=10000000, f_favail=10000000)
+        with patch.object(driver.shutil, 'disk_usage', return_value=SimpleNamespace(free=free)), \
+             patch.object(driver.os, 'statvfs', return_value=filesystem), \
+             patch.object(driver.subprocess, 'check_output',
+                          side_effect=AssertionError('Undersized disk passed preflight')):
+            with self.assertRaisesRegex(RuntimeError, 'Insufficient free disk'):
+                driver.preflight(self.root, pending)
+
+    def test_benchmark_memory_estimate_is_bound_to_resolution(self):
+        self.assertTrue(hasattr(driver, 'worker_memory_estimate'))
+        legacy = {'gpu': 'test-gpu', 'torch_peak_reserved_GiB': 2.}
+        self.assertEqual(driver.worker_memory_estimate(legacy, 'test-gpu', 32), 2816.)
+        self.assertEqual(driver.worker_memory_estimate(legacy, 'test-gpu', 64), 6144.)
+        sized = dict(legacy, image_size=64)
+        self.assertEqual(driver.worker_memory_estimate(sized, 'test-gpu', 64), 2816.)
+        self.assertEqual(driver.worker_memory_estimate(sized, 'test-gpu', 32), 6144.)
+        nested = dict(legacy, manifest={'config': {'image_size': 64}, 'image_size': 64})
+        self.assertEqual(driver.worker_memory_estimate(nested, 'test-gpu', 64), 2816.)
 
     def test_missing_run_is_not_silently_ignored(self):
         path = next(self.root.glob('main-cifar10-*/result.json'))

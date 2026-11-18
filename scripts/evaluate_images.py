@@ -9,6 +9,8 @@ from pathlib import Path
 import time
 import math
 import torch
+from PIL import Image
+from ganopt.data import CIFAR10_64_REAL_RESIZE
 from ganopt.runtime import source_hash,validate_image_export,METRIC_PROTOCOL
 
 
@@ -17,9 +19,26 @@ def evaluate(folder,cuda=False):
     if manifest['source_hash']!=source_hash(): raise ValueError('Export source mismatch')
     validate_image_export(manifest['config'],manifest['reference_split'],manifest['count'],manifest['evaluation_seed'],manifest['oracle_calls'])
     if manifest.get('metric_protocol')!=METRIC_PROTOCOL: raise ValueError('Image metric protocol mismatch')
+    image_size = manifest['config'].get('image_size', 32)
+    declared_size = manifest.get('image_size', 32)
+    if type(declared_size) is not int or declared_size != image_size:
+        raise ValueError('Export image_size disagrees with configuration')
+    if image_size == 64 and (manifest.get('dataset') != 'cifar10' or
+                             manifest.get('real_resize') != CIFAR10_64_REAL_RESIZE):
+        raise ValueError('64×64 CIFAR-10 exports require the declared PIL bilinear real-image resize')
     for sub in ['real','fake']:
-        if len(list((folder/sub).glob('*.png')))!=manifest['count']:
+        images = list((folder/sub).glob('*.png'))
+        if len(images)!=manifest['count']:
             raise ValueError('Image count disagrees with manifest')
+        if image_size == 64:
+            for path in images:
+                try:
+                    with Image.open(path, formats=['PNG']) as image:
+                        size = image.size
+                except OSError as error:
+                    raise ValueError(f'Unable to read PNG header for {path}') from error
+                if size != (image_size, image_size):
+                    raise ValueError(f'Expected {image_size}×{image_size} PNG for {path}, got {size}')
     if cuda and not torch.cuda.is_available(): raise RuntimeError('CUDA is unavailable')
     import torch_fidelity
     if importlib.metadata.version('torch-fidelity')!=METRIC_PROTOCOL['torch_fidelity_version']:

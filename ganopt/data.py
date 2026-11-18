@@ -8,6 +8,16 @@ import numpy as np
 import torch
 
 
+CIFAR10_64_REAL_RESIZE = 'pil_bilinear'
+
+
+def resize_cifar10_to_64(image):
+    """Apply the same PIL resize to CIFAR-10 training and reference images."""
+    from PIL import Image
+
+    return image.resize((64, 64), resample=Image.Resampling.BILINEAR)
+
+
 def split_indices(size: int, seed: int, validation_size: int):
     indices=np.random.default_rng(seed).permutation(size)
     return indices[validation_size:],indices[:validation_size]
@@ -32,8 +42,9 @@ class BatchStream:
             else: raise ValueError('Unknown dataset')
             self.indices,self.validation=split_indices(len(self.dataset),config['split_seed'],val_size)
             self.split_hash=hashlib.sha256(self.indices.astype('<i8').tobytes()).hexdigest()
+            resize = resize_cifar10_to_64 if config.get('image_size', 32) == 64 else transforms.Resize((32,32))
             self.transform=transforms.Compose([
-                transforms.Resize((32,32)),
+                resize,
                 transforms.Grayscale(3) if config['dataset']=='mnist' else transforms.Lambda(lambda x:x),
                 transforms.ToTensor(),transforms.Normalize((.5,.5,.5),(.5,.5,.5))])
 
